@@ -61,4 +61,3 @@ module.exports = (client) => {
     }
   });
 };
-console.log("Interaction received:", interaction.type, interaction.customId);
