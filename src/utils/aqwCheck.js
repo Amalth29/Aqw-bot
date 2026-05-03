@@ -7,27 +7,40 @@ async function checkAQWUser(username) {
     const res = await axios.get(url, {
       timeout: 15000,
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
-        "Accept":
-          "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Referer": "https://account.aq.com/",
-        "Connection": "keep-alive"
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "text/html"
       }
     });
 
     const html = res.data.toLowerCase();
 
-    if (
-      html.includes("no character found") ||
-      html.includes("character not found") ||
-      html.includes("could not find")
-    ) {
+    // Clear fake/not-found signals
+    const invalidSignals = [
+      "no character found",
+      "character not found",
+      "could not find",
+      "does not exist",
+      "not found"
+    ];
+
+    if (invalidSignals.some(signal => html.includes(signal))) {
       return false;
     }
 
-    return true;
+    // Require real character-page data, not just a page load
+    const hasLevel = /level\s*[:\-]?\s*\d+/i.test(res.data);
+    const hasClass = html.includes("class");
+    const hasCharacterInfo =
+      html.includes("character page") ||
+      html.includes("charpage") ||
+      html.includes("character details");
+
+    // Only verify if it has multiple real-profile indicators
+    if (hasLevel && hasClass && hasCharacterInfo) {
+      return true;
+    }
+
+    return false;
   } catch (err) {
     console.error("AQW check failed:", err.message);
     return false;
