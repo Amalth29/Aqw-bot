@@ -28,7 +28,7 @@ module.exports = (client) => {
           .setStyle(TextInputStyle.Short);
 
         modal.addComponents(new ActionRowBuilder().addComponents(input));
-
+        console.log("Verify button clicked by:", interaction.user.tag);
         return interaction.showModal(modal);
       }
     }
@@ -49,7 +49,8 @@ module.exports = (client) => {
             embeds: [embeds.error("Account not found")]
           });
         }
-
+        console.log("Modal submitted by:", interaction.user.tag);
+        console.log("Username entered:", username); 
         const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
         if (log) log.send(`✅ ${interaction.user.tag} verified as ${username}`);
 
@@ -60,3 +61,4 @@ module.exports = (client) => {
     }
   });
 };
+console.log("Interaction received:", interaction.type, interaction.customId);
