@@ -52,7 +52,11 @@ module.exports = (client) => {
         console.log("Modal submitted by:", interaction.user.tag);
         console.log("Username entered:", username); 
         const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
-        if (log) log.send(`✅ ${interaction.user.tag} verified as ${username}`);
+        if (log) {
+            log.send({
+                embeds: [embeds.log(interaction.user, username)]
+  });
+}
 
         return interaction.editReply({
           embeds: [embeds.success(username)]
