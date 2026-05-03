@@ -13,21 +13,22 @@ async function checkAQWUser(username) {
 
     const html = res.data.toLowerCase();
 
-    // Invalid / missing account checks
+    // These mean the character does NOT exist
     if (
       html.includes("no character found") ||
       html.includes("character not found") ||
-      html.includes("does not exist") ||
+      html.includes("could not find") ||
       html.includes("not found")
     ) {
       return false;
     }
 
-    // Valid AQW character pages usually contain actual character data
+    // These usually exist on real AQW character pages
     if (
-      html.includes("level") &&
-      html.includes("class") &&
-      html.includes("character")
+      html.includes("charpage") ||
+      html.includes("character page") ||
+      html.includes("level") ||
+      html.includes("class")
     ) {
       return true;
     }
