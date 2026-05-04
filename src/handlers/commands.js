@@ -16,6 +16,19 @@ module.exports = (client) => {
           .setLabel("Verify Account")
           .setStyle(ButtonStyle.Primary)
       );
+      if (message.content.startsWith("!say")) {
+
+    const args = message.content.slice(5).trim();
+    const targetChannelId = "1441450698347909300"; // replace this
+
+    const channel = message.guild.channels.cache.get(targetChannelId);
+
+    if (!channel) {
+      return message.reply("❌ Channel not found.");
+    }
+
+    channel.send(args);
+  }
 
       message.channel.send({
         embeds: [embeds.dashboard()],
