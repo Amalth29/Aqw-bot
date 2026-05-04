@@ -26,20 +26,36 @@ module.exports = (client) => {
 
     // !say command
     if (message.content.startsWith("!say")) {
-      const args = message.content.slice(5).trim();
-      
-      if (!args) {
-        return message.reply("❌ Please provide a message.");
-      }
 
-      const targetChannelId = "1441450698347909300";
-      const channel = message.guild.channels.cache.get(targetChannelId);
-      console.log("Message received:", message.content);
-      if (!channel) {
-        return message.reply("❌ Channel not found.");
-      }
+  const allowedRoleName = "MODERATOR"; // 👈 change this to your role name
 
-      return channel.send(args);
-    }
+  const hasRole = message.member.roles.cache.some(
+    role => role.name === allowedRoleName
+  );
+
+  if (!hasRole) {
+    return message.reply("❌ You don't have permission to use this command.");
+  }
+
+  const args = message.content.slice(5).trim();
+
+  if (!args) {
+    return message.reply("❌ Please provide a message.");
+  }
+
+  const targetChannelId = "1441450698347909300";
+  const channel = message.guild.channels.cache.get(targetChannelId);
+
+  if (!channel) {
+    return message.reply("❌ Channel not found.");
+  }
+
+  await channel.send({
+    content: args,
+    allowedMentions: { parse: ["users", "roles", "everyone"] }
+  });
+
+  return message.reply("✅ Sent.");
+}
   });
 };
