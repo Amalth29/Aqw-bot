@@ -14,6 +14,12 @@ async function verifyUser(interaction, username, config) {
   if (unverified && interaction.member.roles.cache.has(unverified.id)) {
     await interaction.member.roles.remove(unverified);
   }
+  // Rename Discord nickname to AQW username
+try {
+  await interaction.member.setNickname(username);
+} catch (err) {
+  console.error("Failed to rename user:", err.message);
+}
 
   return { success: true };
 }
