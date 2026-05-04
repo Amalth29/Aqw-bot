@@ -7,12 +7,14 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.GuildMembers,
-    GatewayIntentBits.MessageContent
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildModeration
   ]
 });
 
 require("./handlers/commands")(client);
 require("./handlers/interactions")(client);
+require("./handlers/logging")(client);
 
 client.once("ready", () => {
   console.log(`Logged in as ${client.user.tag}`);
