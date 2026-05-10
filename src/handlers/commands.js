@@ -6,7 +6,45 @@ console.log("commands.js loaded");
 module.exports = (client) => {
   client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
+    
+if (message.content === "!syncnames") {
+  if (!message.member.permissions.has("Administrator")) {
+    return message.reply("❌ You don't have permission to use this.");
+  }
 
+  const fs = require("fs");
+  const path = require("path");
+
+  const dbPath = path.join(__dirname, "../data/verifiedUsers.json");
+
+  const verifiedUsers = fs.existsSync(dbPath)
+    ? JSON.parse(fs.readFileSync(dbPath, "utf8"))
+    : {};
+
+  await message.reply("🔄 Syncing server nicknames...");
+
+  const members = await message.guild.members.fetch();
+
+  let added = 0;
+
+  members.forEach(member => {
+    if (member.user.bot) return;
+
+    const name = member.nickname || member.displayName;
+    if (!name) return;
+
+    const normalized = name.toLowerCase().trim();
+
+    if (!verifiedUsers[normalized]) {
+      verifiedUsers[normalized] = member.user.id;
+      added++;
+    }
+  });
+
+  fs.writeFileSync(dbPath, JSON.stringify(verifiedUsers, null, 2));
+
+  return message.channel.send(`✅ Synced ${added} names into verifiedUsers.json.`);
+}
     // !dashboard command
     if (message.content === "!dashboard") {
       if (message.channel.id !== config.VERIFY_CHANNEL_ID) return;

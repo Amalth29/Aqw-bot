@@ -1,5 +1,13 @@
 const axios = require("axios");
 
+function cleanText(text) {
+  return text
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function checkAQWUser(username) {
   try {
     const url = `https://account.aq.com/CharPage?id=${encodeURIComponent(username)}`;
@@ -7,43 +15,43 @@ async function checkAQWUser(username) {
     const res = await axios.get(url, {
       timeout: 15000,
       headers: {
-        "User-Agent": "Mozilla/5.0",
-        "Accept": "text/html"
+        "User-Agent": "Mozilla/5.0"
       }
     });
 
-    const html = res.data.toLowerCase();
+    const html = res.data;
 
-    // Clear fake/not-found signals
-    const invalidSignals = [
-      "no character found",
-      "character not found",
-      "could not find",
-      "does not exist",
-      "not found"
-    ];
+    const h1Match = html.match(/<h1[^>]*>(.*?)<\/h1>/i);
+    if (!h1Match) return { exists: false };
 
-    if (invalidSignals.some(signal => html.includes(signal))) {
-      return false;
+    const foundName = cleanText(h1Match[1]);
+
+    if (foundName.toLowerCase() !== username.trim().toLowerCase()) {
+      return { exists: false };
     }
 
-    // Require real character-page data, not just a page load
-    const hasLevel = /level\s*[:\-]?\s*\d+/i.test(res.data);
-    const hasClass = html.includes("class");
-    const hasCharacterInfo =
-      html.includes("character page") ||
-      html.includes("charpage") ||
-      html.includes("character details");
+    // Convert page HTML into readable text
+const plainText = cleanText(html);
 
-    // Only verify if it has multiple real-profile indicators
-    if (hasLevel && hasClass && hasCharacterInfo) {
-      return true;
-    }
+let guild = "No Guild";
 
-    return false;
+const guildMatch = plainText.match(/Guild:\s*(.*?)\s*Achievements/i);
+
+if (guildMatch && guildMatch[1]) {
+  guild = guildMatch[1].trim();
+}
+
+console.log("AQW username:", foundName);
+console.log("AQW guild:", guild);
+
+return {
+  exists: true,
+  username: foundName,
+  guild
+};
   } catch (err) {
     console.error("AQW check failed:", err.message);
-    return false;
+    return { exists: false };
   }
 }
 

@@ -14,6 +14,14 @@ const client = new Client({
   ]
 });
 
+client.on("error", (err) => {
+  console.error("Client error:", err);
+});
+
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled promise rejection:", err);
+});
+
 require("./handlers/commands")(client);
 require("./handlers/interactions")(client);
 require("./handlers/logging")(client);

@@ -45,17 +45,56 @@ module.exports = (client) => {
         const result = await verifyUser(interaction, username, config);
 
         if (!result.success) {
-          return interaction.editReply({
-            embeds: [embeds.error("Account not found")]
-          });
-        }
+  if (result.reason === "duplicate") {
+    const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
+
+    if (log) {
+      log.send({
+        content: "<@&1441458984581206087>",
+        embeds: [
+          embeds.error(
+            `⚠️ Possible identity fake detected.\n\n` +
+            `User: ${interaction.user}\n` +
+            `Tried to claim AQW account: **${result.username}**\n` +
+            `Already claimed by: <@${result.existingUserId}>`
+          )
+        ]
+      });
+    }
+
+    return interaction.editReply({
+      embeds: [
+        embeds.error(
+          "User with this AQW Account already in the Server. A moderator has been notified Kindly wait for verification."
+        )
+      ]
+    });
+  }
+
+  return interaction.editReply({
+    embeds: [embeds.error(result.message || "Verification failed.")]
+  });
+}
         console.log("Modal submitted by:", interaction.user.tag);
         console.log("Username entered:", username); 
         const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
         if (log) {
             log.send({
-                embeds: [embeds.log(interaction.user, username)]
+                embeds: [embeds.log(interaction.user, result.username, result.guild)]
   });
+}
+const welcomeLogChannel = interaction.guild.channels.cache.get(config.WELCOME_LOG_CHANNEL_ID);
+
+if (welcomeLogChannel) {
+  welcomeLogChannel.send({
+    embeds: [embeds.welcomeLog(interaction.user, result.username, result.guild)]
+  });
+}
+
+const mainChatChannel = interaction.guild.channels.cache.get(config.MAIN_CHAT_CHANNEL_ID);
+
+if (mainChatChannel) {
+  mainChatChannel.send(`Welcome to Stormforged ${interaction.user}!`);
 }
 
         return interaction.editReply({

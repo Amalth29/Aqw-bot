@@ -27,7 +27,20 @@ module.exports = {
       .setFooter({ text: "Stormforged Verification System" })
       .setTimestamp();
   },
-
+welcomeLog(user, username, guild) {
+  return new EmbedBuilder()
+    .setTitle("📥 New Verified Member")
+    .setDescription(`${user} has entered the server.`)
+    .addFields(
+      { name: "👤 Discord", value: user.tag, inline: true },
+      { name: "🎮 AQW", value: username, inline: true },
+      { name: "🏰 Guild", value: guild || "No Guild", inline: true }
+    )
+    .setColor(0x57F287)
+    .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+    .setFooter({ text: "Stormforged Entry Log" })
+    .setTimestamp();
+},
   error(msg) {
     return new EmbedBuilder()
       .setTitle("❌ Verification Failed")
@@ -37,18 +50,19 @@ module.exports = {
       .setTimestamp();
   },
 
-  log(user, username) {
-    return new EmbedBuilder()
-      .setTitle("🛡️ Stormforged Verification")
-      .setDescription(`**${user.tag}** has successfully verified.`)
-      .addFields(
-        { name: "👤 Discord User", value: `${user}`, inline: true },
-        { name: "🏷️ Discord Tag", value: user.tag, inline: true },
-        { name: "🎮 AQW Username", value: username, inline: false }
-      )
-      .setColor(0x5865F2)
-      .setThumbnail(user.displayAvatarURL({ dynamic: true }))
-      .setFooter({ text: "Stormforged Verification System" })
-      .setTimestamp();
-  }
+  log(user, username, guild) {
+  return new EmbedBuilder()
+    .setTitle("🛡️ Stormforged Verification")
+    .setDescription(`**${user.tag}** has successfully verified.`)
+    .addFields(
+      { name: "👤 Discord User", value: `${user}`, inline: true },
+      { name: "🏷️ Discord Tag", value: user.tag, inline: true },
+      { name: "🎮 AQW Username", value: username, inline: true },
+      { name: "🏰 AQW Guild", value: guild || "No Guild", inline: true }
+    )
+    .setColor(0x5865F2)
+    .setThumbnail(user.displayAvatarURL({ dynamic: true }))
+    .setFooter({ text: "Stormforged Verification System" })
+    .setTimestamp();
+}
 };
