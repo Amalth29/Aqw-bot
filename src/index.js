@@ -25,6 +25,7 @@ process.on("unhandledRejection", (err) => {
 require("./handlers/commands")(client);
 require("./handlers/interactions")(client);
 require("./handlers/logging")(client);
+require("./handlers/automod")(client);
 
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
