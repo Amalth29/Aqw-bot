@@ -3,7 +3,19 @@ const config = require("../config");
 
 module.exports = (client) => {
   console.log("✅ Full logging system loaded");
+const recentLogs = new Set();
 
+function isDuplicateLog(key) {
+  if (recentLogs.has(key)) return true;
+
+  recentLogs.add(key);
+
+  setTimeout(() => {
+    recentLogs.delete(key);
+  }, 5000);
+
+  return false;
+}
   async function sendLog(guild, embed) {
     const logChannel = guild.channels.cache.get(config.LOG_CHANNEL_ID);
     if (!logChannel) return;
@@ -29,7 +41,9 @@ module.exports = (client) => {
         { name: "Channel", value: `${message.channel}`, inline: true },
         { name: "Message", value: message.content || "*No text content*" }
       );
+const key = `delete-${message.id}`;
 
+if (isDuplicateLog(key)) return;
     await sendLog(message.guild, embed);
   });
 
