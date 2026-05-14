@@ -68,6 +68,11 @@ if (interaction.isChatInputCommand()) {
     return interaction.reply({ embeds: [embed] });
   }
 }
+if (interaction.isChatInputCommand()) {
+  if (interaction.commandName === "ping") {
+    return interaction.reply("🏓 Pong!");
+  }
+}
     // BUTTON
     if (interaction.isButton()) {
       if (interaction.customId === "start_verify") {
