@@ -61,7 +61,91 @@ const calendarText =
     return interaction.reply({ embeds: [embed] });
   }
 }
+if (interaction.commandName === "say") {
+  const allowedRole = "1448328583020941423";
 
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const channel = interaction.options.getChannel("channel");
+  const content = interaction.options.getString("message");
+
+  if (!channel || !channel.isTextBased()) {
+    return interaction.reply({
+      content: "❌ Please select a text channel.",
+      ephemeral: true
+    });
+  }
+
+  await channel.send({
+    content,
+    allowedMentions: {
+      parse: ["users", "roles", "everyone"]
+    }
+  });
+
+  return interaction.reply({
+    content: `✅ Message sent to ${channel}.`,
+    ephemeral: true
+  });
+}
+if (interaction.commandName === "reply") {
+
+  const allowedRole = "1448328583020941423";
+
+  if (!interaction.member.roles.cache.has(allowedRole)) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const link = interaction.options.getString("message_link");
+  const content = interaction.options.getString("content");
+
+  try {
+
+    const match = link.match(/channels\/(\d+)\/(\d+)\/(\d+)/);
+
+    if (!match) {
+      return interaction.reply({
+        content: "❌ Invalid message link.",
+        ephemeral: true
+      });
+    }
+
+    const channelId = match[2];
+    const messageId = match[3];
+
+    const channel = await client.channels.fetch(channelId);
+
+    const targetMessage = await channel.messages.fetch(messageId);
+
+    await targetMessage.reply(content);
+
+    await interaction.reply({
+      content: "✅ Reply sent.",
+      ephemeral: true
+    });
+
+  } catch (err) {
+
+    console.error(err);
+
+    interaction.reply({
+      content: "❌ Failed to send reply.",
+      ephemeral: true
+    });
+
+  }
+}
     // BUTTON
     if (interaction.isButton()) {
       if (interaction.customId === "start_verify") {

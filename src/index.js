@@ -30,6 +30,43 @@ require("./handlers/automod")(client);
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
 
+await client.application.commands.create({
+  name: "say",
+  description: "Send a message as the bot to a selected channel",
+  options: [
+    {
+      name: "channel",
+      description: "Channel to send the message in",
+      type: 7,
+      required: true
+    },
+    {
+      name: "message",
+      description: "Message content",
+      type: 3,
+      required: true
+    }
+  ]
+});
+
+  await client.application.commands.create({
+  name: "reply",
+  description: "Reply to a message as the bot",
+  options: [
+    {
+      name: "message_link",
+      description: "Discord message link",
+      type: 3,
+      required: true
+    },
+    {
+      name: "content",
+      description: "Reply content",
+      type: 3,
+      required: true
+    }
+  ]
+});
   await client.application.commands.create({
     name: "ping",
     description: "Test command"
