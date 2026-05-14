@@ -29,12 +29,12 @@ require("./handlers/automod")(client);
 
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
-
-  await client.application.commands.create({
+  try {
+    await client.application.commands.create({
   name: "calendar",
   description: "Shows the AQW boost calendar for May 2026"
 });
-  try {
+
     await client.application.commands.create({
       name: "ping",
       description: "Test command"
