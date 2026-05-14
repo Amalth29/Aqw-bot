@@ -29,19 +29,18 @@ require("./handlers/automod")(client);
 
 client.once("ready", async () => {
   console.log(`Logged in as ${client.user.tag}`);
-  
-    await client.application.commands.create({
-  name: "calendar",
-  description: "Shows the AQW boost calendar for May 2026"
-});
 
-    await client.application.commands.create({
-      name: "ping",
-      description: "Test command"
-    });
+  await client.application.commands.create({
+    name: "ping",
+    description: "Test command"
+  });
 
-   
-  
+  await client.application.commands.create({
+    name: "calendar",
+    description: "Shows the AQW boost calendar for May 2026"
+  });
+
+  console.log("Slash commands registered");
 });
 
 client.login(config.TOKEN);
