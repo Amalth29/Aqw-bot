@@ -13,7 +13,61 @@ const { verifyUser } = require("./verification");
 module.exports = (client) => {
 
   client.on(Events.InteractionCreate, async (interaction) => {
+if (interaction.isChatInputCommand()) {
+  if (interaction.commandName === "calendar") {
+    const { EmbedBuilder } = require("discord.js");
 
+    const embed = new EmbedBuilder()
+      .setTitle("📅 AQW Boost Calendar — May 2026")
+      .setColor(0x5865F2)
+      .setDescription(
+        "**May 2026 Daily Boosts**\n\n" +
+        "```text\n" +
+        "Sun Mon Tue Wed Thu Fri Sat\n" +
+        "                1   2\n" +
+        "                ALL Keys\n" +
+        "\n" +
+        "3   4   5   6   7   8   9\n" +
+        "    Gold MW  Rep Ess CP\n" +
+        "\n" +
+        "10  11  12  13  14  15  16\n" +
+        "    EXP MW  Gold    Rep\n" +
+        "\n" +
+        "17  18  19  20  21  22  23\n" +
+        "    CP  MW  EXP     Gold\n" +
+        "\n" +
+        "24  25  26  27  28  29  30\n" +
+        "    Rep MW  CP      ALL\n" +
+        "\n" +
+        "31\n" +
+        "```\n"
+      )
+      .addFields(
+        { name: "🟣 May 1", value: "Double ALL Boost\nMembers: Free Keys Available", inline: false },
+        { name: "🟡 May 4", value: "Double Gold Boost", inline: true },
+        { name: "🛠️ May 5", value: "Mid-Week Update", inline: true },
+        { name: "🟢 May 6", value: "Double Rep Boost", inline: true },
+        { name: "✨ May 7", value: "Essences + Totems Boost", inline: true },
+        { name: "🔵 May 8", value: "Double Class Points Boost", inline: true },
+        { name: "⚡ May 11", value: "Double EXP Boost", inline: true },
+        { name: "🛠️ May 12", value: "Mid-Week Update", inline: true },
+        { name: "🟡 May 13", value: "Double Gold Boost", inline: true },
+        { name: "🟢 May 15", value: "Double Rep Boost", inline: true },
+        { name: "🔵 May 18", value: "Double Class Points Boost", inline: true },
+        { name: "🛠️ May 19", value: "Mid-Week Update", inline: true },
+        { name: "⚡ May 20", value: "Double EXP Boost", inline: true },
+        { name: "🟡 May 22", value: "Double Gold Boost", inline: true },
+        { name: "🟢 May 25", value: "Double Rep Boost", inline: true },
+        { name: "🛠️ May 26", value: "Mid-Week Update", inline: true },
+        { name: "🔵 May 27", value: "Double Class Points Boost", inline: true },
+        { name: "🟣 May 29", value: "Double ALL Boost", inline: true }
+      )
+      .setFooter({ text: "AQW Calendar" })
+      .setTimestamp();
+
+    return interaction.reply({ embeds: [embed] });
+  }
+}
     // BUTTON
     if (interaction.isButton()) {
       if (interaction.customId === "start_verify") {

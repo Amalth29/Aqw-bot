@@ -43,7 +43,7 @@ function isDuplicateLog(key) {
       );
 const key = `delete-${message.id}`;
 
-if (isDuplicateLog(key)) return;
+if (isDuplicateLog(key)) return; 
     await sendLog(message.guild, embed);
   });
 
