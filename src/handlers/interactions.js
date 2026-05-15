@@ -90,7 +90,9 @@ if (interaction.commandName === "say") {
       parse: ["users", "roles", "everyone"]
     }
   });
-
+console.log(
+  `[SAY COMMAND] ${interaction.user.tag} (${interaction.user.id}) sent a message in #${channel.name}: ${content}`
+);
   return interaction.reply({
     content: `✅ Message sent to ${channel}.`,
     ephemeral: true
@@ -129,7 +131,9 @@ if (interaction.commandName === "reply") {
     const targetMessage = await channel.messages.fetch(messageId);
 
     await targetMessage.reply(content);
-
+console.log(
+  `[SAY COMMAND] ${interaction.user.tag} (${interaction.user.id}) sent a message in #${channel.name}: ${content}`
+);
     await interaction.reply({
       content: "✅ Reply sent.",
       ephemeral: true
