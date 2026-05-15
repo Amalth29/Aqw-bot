@@ -7,7 +7,10 @@ function cleanText(text) {
     .replace(/\s+/g, " ")
     .trim();
 }
-
+function log(message) {
+  const timestamp = new Date().toLocaleString();
+  console.log(`[${timestamp}] ${message}`);
+}
 async function checkAQWUser(username) {
   try {
     const url = `https://account.aq.com/CharPage?id=${encodeURIComponent(username)}`;
