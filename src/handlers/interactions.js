@@ -187,10 +187,10 @@ log(
 
         if (!result.success) {
   if (result.reason === "duplicate") {
-    const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
+    const logChannel = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
 
-    if (log) {
-      log.send({
+    if (logChannel) {
+      logChannel.send({
         content: "<@&1441458984581206087>",
         embeds: [
           embeds.error(
