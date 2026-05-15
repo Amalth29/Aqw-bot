@@ -2,7 +2,7 @@ const { Events, EmbedBuilder } = require("discord.js");
 const config = require("../config");
 
 module.exports = (client) => {
-  console.log("✅ Full logging system loaded");
+  log("✅ Full logging system loaded");
 const recentLogs = new Set();
 
 function isDuplicateLog(key) {

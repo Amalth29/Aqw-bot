@@ -28,7 +28,7 @@ require("./handlers/logging")(client);
 require("./handlers/automod")(client);
 
 client.once("ready", async () => {
-  console.log(`Logged in as ${client.user.tag}`);
+  log(`Logged in as ${client.user.tag}`);
 
 await client.application.commands.create({
   name: "say",
@@ -77,9 +77,9 @@ await client.application.commands.create({
     description: "Shows the AQW boost calendar for May 2026"
   });
 
-  console.log("Slash commands registered");
+  
 });
 
 client.login(config.TOKEN);
 
-console.log("TOKEN:", process.env.TOKEN);
+log("TOKEN:", process.env.TOKEN);

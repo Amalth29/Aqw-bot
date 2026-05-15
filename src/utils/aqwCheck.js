@@ -41,8 +41,8 @@ if (guildMatch && guildMatch[1]) {
   guild = guildMatch[1].trim();
 }
 
-console.log("AQW username:", foundName);
-console.log("AQW guild:", guild);
+log("AQW username:", foundName);
+log("AQW guild:", guild);
 
 return {
   exists: true,

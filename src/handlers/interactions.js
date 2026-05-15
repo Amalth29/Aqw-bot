@@ -9,6 +9,11 @@ const {
 const config = require("../config");
 const embeds = require("../utils/embeds");
 const { verifyUser } = require("./verification");
+function log(message) {
+  const timestamp = new Date().toLocaleString();
+
+  console.log(`[${timestamp}] ${message}`);
+}
 
 module.exports = (client) => {
 
@@ -90,7 +95,7 @@ if (interaction.commandName === "say") {
       parse: ["users", "roles", "everyone"]
     }
   });
-console.log(
+log(
   `[SAY COMMAND] ${interaction.user.tag} (${interaction.user.id}) sent a message in #${channel.name}: ${content}`
 );
   return interaction.reply({
@@ -131,7 +136,7 @@ if (interaction.commandName === "reply") {
     const targetMessage = await channel.messages.fetch(messageId);
 
     await targetMessage.reply(content);
-console.log(
+log(
   `[SAY COMMAND] ${interaction.user.tag} (${interaction.user.id}) sent a message in #${channel.name}: ${content}`
 );
     await interaction.reply({
@@ -164,7 +169,7 @@ console.log(
           .setStyle(TextInputStyle.Short);
 
         modal.addComponents(new ActionRowBuilder().addComponents(input));
-        console.log("Verify button clicked by:", interaction.user.tag);
+        log(`Verify button clicked by: ${interaction.user.tag}`);
         return interaction.showModal(modal);
       }
     }
@@ -211,8 +216,8 @@ console.log(
     embeds: [embeds.error(result.message || "Verification failed.")]
   });
 }
-        console.log("Modal submitted by:", interaction.user.tag);
-        console.log("Username entered:", username); 
+        log(`Modal submitted by: ${interaction.user.tag}`);
+        log(`Username entered: ${username}`);
         const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
         if (log) {
             log.send({
