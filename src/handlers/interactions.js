@@ -218,9 +218,9 @@ log(
 }
         log(`Modal submitted by: ${interaction.user.tag}`);
         log(`Username entered: ${username}`);
-        const log = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
-        if (log) {
-            log.send({
+        const logChannel = interaction.guild.channels.cache.get(config.LOG_CHANNEL_ID);
+        if (logChannel) {
+            logChannel.send({
                 embeds: [embeds.log(interaction.user, result.username, result.guild)]
   });
 }
