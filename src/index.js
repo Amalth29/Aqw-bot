@@ -30,7 +30,7 @@ require("./handlers/interactions")(client);
 require("./handlers/logging")(client);
 require("./handlers/automod")(client);
 
-client.once(Events.ClientReady, async () => {
+client.once("ready", async () => {
   log(`Logged in as ${client.user.tag}`);
 
 await client.application.commands.create({
