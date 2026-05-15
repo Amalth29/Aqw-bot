@@ -13,7 +13,10 @@ const client = new Client({
     GatewayIntentBits.GuildEmojisAndStickers
   ]
 });
-
+function log(message) {
+  const timestamp = new Date().toLocaleString();
+  console.log(`[${timestamp}] ${message}`);
+}
 client.on("error", (err) => {
   console.error("Client error:", err);
 });
@@ -27,7 +30,7 @@ require("./handlers/interactions")(client);
 require("./handlers/logging")(client);
 require("./handlers/automod")(client);
 
-client.once("ready", async () => {
+client.once(Events.ClientReady, async () => {
   log(`Logged in as ${client.user.tag}`);
 
 await client.application.commands.create({
@@ -82,4 +85,4 @@ await client.application.commands.create({
 
 client.login(config.TOKEN);
 
-log("TOKEN:", process.env.TOKEN);
+console.log("TOKEN:", process.env.TOKEN);

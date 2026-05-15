@@ -2,7 +2,10 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const embeds = require("../utils/embeds");
 const config = require("../config");
 console.log("commands.js loaded");
-
+function log(message) {
+  const timestamp = new Date().toLocaleString();
+  console.log(`[${timestamp}] ${message}`);
+}
 module.exports = (client) => {
   client.on("messageCreate", async (message) => {
     if (message.author.bot) return;

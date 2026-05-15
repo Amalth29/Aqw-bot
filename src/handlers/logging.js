@@ -1,6 +1,10 @@
 const { Events, EmbedBuilder } = require("discord.js");
 const config = require("../config");
 
+function log(message) {
+  const timestamp = new Date().toLocaleString();
+  console.log(`[${timestamp}] ${message}`);
+}
 module.exports = (client) => {
   log("✅ Full logging system loaded");
 const recentLogs = new Set();
