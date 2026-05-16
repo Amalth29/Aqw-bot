@@ -7,7 +7,8 @@ module.exports = {
       .setTitle("🛡️ Stormforged Verification Center")
       .setDescription(
         "**Welcome to Stormforged.**\n\n" +
-        "Click the button below to verify your AdventureQuest Worlds account.\n\n" 
+        "Click the button below to verify your AdventureQuest Worlds account.\n\n"+
+        "Please type ur AQW Username below in case the bot isn't working.\n\n" 
         
       )
       .setColor(0x5865F2)
