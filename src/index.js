@@ -43,18 +43,6 @@ await client.application.commands.create({
       type: 7,
       required: true
     },
-    {
-      name: "title",
-      description: "Announcement title",
-      type: 3,
-      required: true
-    },
-    {
-      name: "message",
-      description: "Announcement message",
-      type: 3,
-      required: true
-    }
   ]
 });
 
@@ -74,18 +62,6 @@ await client.application.commands.create({
       type: 3,
       required: true
     },
-    {
-      name: "title",
-      description: "New title",
-      type: 3,
-      required: true
-    },
-    {
-      name: "message",
-      description: "New message",
-      type: 3,
-      required: true
-    }
   ]
 });
 await client.application.commands.create({

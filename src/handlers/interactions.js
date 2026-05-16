@@ -1,5 +1,6 @@
 const {
   Events,
+  EmbedBuilder,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -18,7 +19,149 @@ function log(message) {
 module.exports = (client) => {
 
   client.on(Events.InteractionCreate, async (interaction) => {
+    if (interaction.isModalSubmit()) {
+  if (interaction.customId.startsWith("announce_modal:")) {
+    const channelId = interaction.customId.split(":")[1];
+    const channel = interaction.guild.channels.cache.get(channelId);
+
+    const title = interaction.fields.getTextInputValue("title");
+    const message = interaction.fields.getTextInputValue("message");
+    const logo = interaction.fields.getTextInputValue("logo");
+    const banner = interaction.fields.getTextInputValue("banner");
+    const footer = interaction.fields.getTextInputValue("footer");
+
+    const embed = new EmbedBuilder()
+      .setTitle(title)
+      .setDescription(message)
+      .setColor(0x5865F2)
+      .setTimestamp();
+
+    if (logo) embed.setThumbnail(logo);
+    if (banner) embed.setImage(banner);
+    if (footer) embed.setFooter({ text: footer });
+
+    const sent = await channel.send({ embeds: [embed] });
+
+    return interaction.reply({
+      content: `✅ Announcement sent.\nMessage ID: \`${sent.id}\``,
+      ephemeral: true
+    });
+  }
+
+  if (interaction.customId.startsWith("edit_announce_modal:")) {
+    const parts = interaction.customId.split(":");
+    const channelId = parts[1];
+    const messageId = parts[2];
+
+    const channel = interaction.guild.channels.cache.get(channelId);
+
+    const title = interaction.fields.getTextInputValue("title");
+    const message = interaction.fields.getTextInputValue("message");
+    const logo = interaction.fields.getTextInputValue("logo");
+    const banner = interaction.fields.getTextInputValue("banner");
+    const footer = interaction.fields.getTextInputValue("footer");
+
+    try {
+      const targetMessage = await channel.messages.fetch(messageId);
+
+      const embed = new EmbedBuilder()
+        .setTitle(title)
+        .setDescription(message)
+        .setColor(0x5865F2)
+        .setTimestamp();
+
+      if (logo) embed.setThumbnail(logo);
+      if (banner) embed.setImage(banner);
+      if (footer) embed.setFooter({ text: footer });
+
+      await targetMessage.edit({ embeds: [embed] });
+
+      return interaction.reply({
+        content: "✅ Announcement updated.",
+        ephemeral: true
+      });
+    } catch (err) {
+      console.error(err);
+
+      return interaction.reply({
+        content: "❌ Could not edit that announcement.",
+        ephemeral: true
+      });
+    }
+  }
+}
 if (interaction.isChatInputCommand()) {
+  if (interaction.commandName === "announce") {
+  const allowedRole = "YOUR_STAFF_ROLE_ID";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const channel = interaction.options.getChannel("channel");
+
+  if (!channel || !channel.isTextBased()) {
+    return interaction.reply({
+      content: "❌ Please select a text channel.",
+      ephemeral: true
+    });
+  }
+
+  const modal = new ModalBuilder()
+    .setCustomId(`announce_modal:${channel.id}`)
+    .setTitle("Create Announcement");
+
+  const titleInput = new TextInputBuilder()
+    .setCustomId("title")
+    .setLabel("Embed Title")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true)
+    .setPlaceholder("🌩️ WELCOME TO STORMFORGED 🌩️");
+
+  const messageInput = new TextInputBuilder()
+    .setCustomId("message")
+    .setLabel("Message")
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(true)
+    .setPlaceholder("Write your announcement here...");
+
+  const logoInput = new TextInputBuilder()
+    .setCustomId("logo")
+    .setLabel("Logo URL / Thumbnail URL")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false)
+    .setPlaceholder("https://example.com/logo.png");
+
+  const bannerInput = new TextInputBuilder()
+    .setCustomId("banner")
+    .setLabel("Banner Image URL")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false)
+    .setPlaceholder("https://example.com/banner.png");
+
+  const footerInput = new TextInputBuilder()
+    .setCustomId("footer")
+    .setLabel("Footer Text")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false)
+    .setPlaceholder("Stormforged Announcement");
+
+  modal.addComponents(
+    new ActionRowBuilder().addComponents(titleInput),
+    new ActionRowBuilder().addComponents(messageInput),
+    new ActionRowBuilder().addComponents(logoInput),
+    new ActionRowBuilder().addComponents(bannerInput),
+    new ActionRowBuilder().addComponents(footerInput)
+  );
+
+  return interaction.showModal(modal);
+}
   if (interaction.commandName === "calendar") {
     const { EmbedBuilder } = require("discord.js");
 const calendarText =
@@ -122,8 +265,6 @@ if (interaction.commandName === "editannounce") {
 
   const channel = interaction.options.getChannel("channel");
   const messageId = interaction.options.getString("message_id");
-  const title = interaction.options.getString("title");
-  const message = interaction.options.getString("message");
 
   if (!channel || !channel.isTextBased()) {
     return interaction.reply({
@@ -132,32 +273,49 @@ if (interaction.commandName === "editannounce") {
     });
   }
 
-  const { EmbedBuilder } = require("discord.js");
+  const modal = new ModalBuilder()
+    .setCustomId(`edit_announce_modal:${channel.id}:${messageId}`)
+    .setTitle("Edit Announcement");
 
-  try {
-    const targetMessage = await channel.messages.fetch(messageId);
+  const titleInput = new TextInputBuilder()
+    .setCustomId("title")
+    .setLabel("New Embed Title")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(true);
 
-    const embed = new EmbedBuilder()
-      .setTitle(title)
-      .setDescription(message)
-      .setColor(0x5865F2)
-      .setFooter({ text: "Stormforged Announcement • Updated" })
-      .setTimestamp();
+  const messageInput = new TextInputBuilder()
+    .setCustomId("message")
+    .setLabel("New Message")
+    .setStyle(TextInputStyle.Paragraph)
+    .setRequired(true);
 
-    await targetMessage.edit({ embeds: [embed] });
+  const logoInput = new TextInputBuilder()
+    .setCustomId("logo")
+    .setLabel("Logo URL / Thumbnail URL")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false);
 
-    return interaction.reply({
-      content: `✅ Announcement updated in ${channel}.`,
-      ephemeral: true
-    });
-  } catch (err) {
-    console.error(err);
+  const bannerInput = new TextInputBuilder()
+    .setCustomId("banner")
+    .setLabel("Banner Image URL")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false);
 
-    return interaction.reply({
-      content: "❌ Could not find or edit that message.",
-      ephemeral: true
-    });
-  }
+  const footerInput = new TextInputBuilder()
+    .setCustomId("footer")
+    .setLabel("Footer Text")
+    .setStyle(TextInputStyle.Short)
+    .setRequired(false);
+
+  modal.addComponents(
+    new ActionRowBuilder().addComponents(titleInput),
+    new ActionRowBuilder().addComponents(messageInput),
+    new ActionRowBuilder().addComponents(logoInput),
+    new ActionRowBuilder().addComponents(bannerInput),
+    new ActionRowBuilder().addComponents(footerInput)
+  );
+
+  return interaction.showModal(modal);
 }
 if (interaction.commandName === "say") {
   const allowedRole = "1448328583020941423";
