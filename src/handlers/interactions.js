@@ -66,6 +66,99 @@ const calendarText =
     return interaction.reply({ embeds: [embed] });
   }
 }
+if (interaction.commandName === "announce") {
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const channel = interaction.options.getChannel("channel");
+  const title = interaction.options.getString("title");
+  const message = interaction.options.getString("message");
+
+  if (!channel || !channel.isTextBased()) {
+    return interaction.reply({
+      content: "❌ Please select a text channel.",
+      ephemeral: true
+    });
+  }
+
+  const { EmbedBuilder } = require("discord.js");
+
+  const embed = new EmbedBuilder()
+    .setTitle(title)
+    .setDescription(message)
+    .setColor(0x5865F2)
+    .setFooter({ text: "Stormforged Announcement" })
+    .setTimestamp();
+
+  const sentMessage = await channel.send({ embeds: [embed] });
+
+  return interaction.reply({
+    content: `✅ Announcement sent to ${channel}.\nMessage ID: \`${sentMessage.id}\``,
+    ephemeral: true
+  });
+}
+
+if (interaction.commandName === "editannounce") {
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const channel = interaction.options.getChannel("channel");
+  const messageId = interaction.options.getString("message_id");
+  const title = interaction.options.getString("title");
+  const message = interaction.options.getString("message");
+
+  if (!channel || !channel.isTextBased()) {
+    return interaction.reply({
+      content: "❌ Please select a text channel.",
+      ephemeral: true
+    });
+  }
+
+  const { EmbedBuilder } = require("discord.js");
+
+  try {
+    const targetMessage = await channel.messages.fetch(messageId);
+
+    const embed = new EmbedBuilder()
+      .setTitle(title)
+      .setDescription(message)
+      .setColor(0x5865F2)
+      .setFooter({ text: "Stormforged Announcement • Updated" })
+      .setTimestamp();
+
+    await targetMessage.edit({ embeds: [embed] });
+
+    return interaction.reply({
+      content: `✅ Announcement updated in ${channel}.`,
+      ephemeral: true
+    });
+  } catch (err) {
+    console.error(err);
+
+    return interaction.reply({
+      content: "❌ Could not find or edit that message.",
+      ephemeral: true
+    });
+  }
+}
 if (interaction.commandName === "say") {
   const allowedRole = "1448328583020941423";
 

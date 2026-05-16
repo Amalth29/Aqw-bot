@@ -34,6 +34,61 @@ client.once("ready", async () => {
   log(`Logged in as ${client.user.tag}`);
 
 await client.application.commands.create({
+  name: "announce",
+  description: "Send an announcement embed",
+  options: [
+    {
+      name: "channel",
+      description: "Channel to send announcement",
+      type: 7,
+      required: true
+    },
+    {
+      name: "title",
+      description: "Announcement title",
+      type: 3,
+      required: true
+    },
+    {
+      name: "message",
+      description: "Announcement message",
+      type: 3,
+      required: true
+    }
+  ]
+});
+
+await client.application.commands.create({
+  name: "editannounce",
+  description: "Edit an existing announcement embed",
+  options: [
+    {
+      name: "channel",
+      description: "Channel where announcement is",
+      type: 7,
+      required: true
+    },
+    {
+      name: "message_id",
+      description: "Message ID of the announcement",
+      type: 3,
+      required: true
+    },
+    {
+      name: "title",
+      description: "New title",
+      type: 3,
+      required: true
+    },
+    {
+      name: "message",
+      description: "New message",
+      type: 3,
+      required: true
+    }
+  ]
+});
+await client.application.commands.create({
   name: "say",
   description: "Send a message as the bot to a selected channel",
   options: [
