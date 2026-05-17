@@ -114,6 +114,8 @@ if (interaction.isChatInputCommand()) {
 
   const role = interaction.options.getRole("role");
 
+  await interaction.guild.members.fetch();
+  
   const members = role.members
     .map(member => {
       return {
