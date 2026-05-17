@@ -442,7 +442,7 @@ function formatMemberTable(members, page = 0, perPage = 15) {
 
   return (
     "```text\n" +
-    "Name                Rank    Lv  \n" +
+    "Name                Rank    Lv  Last/Server\n" +
     "--------------------------------------------\n" +
     rows.join("\n") +
     "\n```"
@@ -630,7 +630,8 @@ log(
   }
 }
     // BUTTON
-    if (
+    if (interaction.isButton()) {
+      if (
   interaction.customId.startsWith("guild_roster_next_") ||
   interaction.customId.startsWith("guild_roster_prev_")
 ) {
