@@ -273,39 +273,64 @@ if (interaction.commandName === "editannounce") {
     });
   }
 
+  let targetMessage;
+
+  try {
+    targetMessage = await channel.messages.fetch(messageId);
+  } catch (err) {
+    return interaction.reply({
+      content: "❌ Could not find that announcement message.",
+      ephemeral: true
+    });
+  }
+
+  const existingEmbed = targetMessage.embeds[0];
+
+  if (!existingEmbed) {
+    return interaction.reply({
+      content: "❌ That message does not contain an embed.",
+      ephemeral: true
+    });
+  }
+
   const modal = new ModalBuilder()
     .setCustomId(`edit_announce_modal:${channel.id}:${messageId}`)
     .setTitle("Edit Announcement");
 
   const titleInput = new TextInputBuilder()
     .setCustomId("title")
-    .setLabel("New Embed Title")
+    .setLabel("Embed Title")
     .setStyle(TextInputStyle.Short)
-    .setRequired(true);
+    .setRequired(true)
+    .setValue(existingEmbed.title || "");
 
   const messageInput = new TextInputBuilder()
     .setCustomId("message")
-    .setLabel("New Message")
+    .setLabel("Message")
     .setStyle(TextInputStyle.Paragraph)
-    .setRequired(true);
+    .setRequired(true)
+    .setValue(existingEmbed.description || "");
 
   const logoInput = new TextInputBuilder()
     .setCustomId("logo")
     .setLabel("Logo URL / Thumbnail URL")
     .setStyle(TextInputStyle.Short)
-    .setRequired(false);
+    .setRequired(false)
+    .setValue(existingEmbed.thumbnail?.url || "");
 
   const bannerInput = new TextInputBuilder()
     .setCustomId("banner")
     .setLabel("Banner Image URL")
     .setStyle(TextInputStyle.Short)
-    .setRequired(false);
+    .setRequired(false)
+    .setValue(existingEmbed.image?.url || "");
 
   const footerInput = new TextInputBuilder()
     .setCustomId("footer")
     .setLabel("Footer Text")
     .setStyle(TextInputStyle.Short)
-    .setRequired(false);
+    .setRequired(false)
+    .setValue(existingEmbed.footer?.text || "");
 
   modal.addComponents(
     new ActionRowBuilder().addComponents(titleInput),
