@@ -3,6 +3,8 @@ const {
   EmbedBuilder,
   ModalBuilder,
   TextInputBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   TextInputStyle,
   ActionRowBuilder
 } = require("discord.js");
@@ -258,7 +260,29 @@ if (interaction.commandName === "guildsync") {
 
   const isAdmin = interaction.member.permissions.has("Administrator");
   const hasRole = interaction.member.roles.cache.has(allowedRole);
+function formatMemberTable(members, page = 0, perPage = 15) {
+  if (!members.length) return "No members found.";
 
+  const start = page * perPage;
+  const pageMembers = members.slice(start, start + perPage);
+
+  const rows = pageMembers.map(m => {
+    const name = m.name.length > 18 ? m.name.slice(0, 17) + "…" : m.name;
+    const rank = m.rank.padEnd(7, " ");
+    const level = String(m.level).padEnd(3, " ");
+    const status = m.status.length > 14 ? m.status.slice(0, 13) + "…" : m.status;
+
+    return `${name.padEnd(19, " ")} ${rank} ${level} ${status}`;
+  });
+
+  return (
+    "```text\n" +
+    "Name                Rank    Lv  Last/Server\n" +
+    "--------------------------------------------\n" +
+    rows.join("\n") +
+    "\n```"
+  );
+}
   if (!isAdmin && !hasRole) {
     return interaction.reply({
       content: "❌ No permission.",
@@ -385,25 +409,43 @@ if (interaction.commandName === "guildsync") {
       .join("\n") + (arr.length > limit ? `\n…and ${arr.length - limit} more` : "");
   }
 
-  const embed = new EmbedBuilder()
-    .setTitle("📋 Stormforged Guild Roster Synced")
-    .setColor(0x5865F2)
-    .addFields(
-      { name: "👥 Total Members", value: `${newMembers.length}`, inline: true },
-      { name: "🆕 New Members", value: `${joined.length}`, inline: true },
-      { name: "🚪 Removed Members", value: `${removed.length}`, inline: true },
-      { name: "🎖️ Rank Changes", value: `${rankChanged.length}`, inline: true },
-      { name: "📈 Level Changes", value: `${levelChanged.length}`, inline: true },
-      { name: "🌐 Status/Server Changes", value: `${statusChanged.length}`, inline: true },
-      { name: "🆕 Joined", value: listNames(joined), inline: false },
-      { name: "🚪 Removed", value: listNames(removed), inline: false }
-    )
-    .setFooter({ text: "Stormforged Guild Monitor" })
-    .setTimestamp();
+  const page = 0;
+const totalPages = Math.ceil(newMembers.length / 15);
 
-  await interaction.editReply({
-    embeds: [embed]
-  });
+const embed = new EmbedBuilder()
+  .setTitle("📋 Stormforged Guild Roster Synced")
+  .setColor(0x5865F2)
+  .addFields(
+    { name: "👥 Total Members", value: `${newMembers.length}`, inline: true },
+    { name: "🆕 New Members", value: `${joined.length}`, inline: true },
+    { name: "🚪 Removed Members", value: `${removed.length}`, inline: true },
+    {
+      name: `📖 Full Roster — Page ${page + 1}/${totalPages}`,
+      value: formatMemberTable(newMembers, page),
+      inline: false
+    }
+  )
+  .setFooter({ text: "Stormforged Guild Monitor" })
+  .setTimestamp();
+
+const row = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId("guild_roster_prev_0")
+    .setLabel("Previous")
+    .setStyle(ButtonStyle.Secondary)
+    .setDisabled(true),
+
+  new ButtonBuilder()
+    .setCustomId("guild_roster_next_0")
+    .setLabel("Next")
+    .setStyle(ButtonStyle.Primary)
+    .setDisabled(totalPages <= 1)
+);
+
+await interaction.editReply({
+  embeds: [embed],
+  components: [row]
+});
 }
 if (interaction.commandName === "editannounce") {
   const allowedRole = "1448328583020941423";
@@ -588,6 +630,62 @@ log(
 }
     // BUTTON
     if (interaction.isButton()) {
+      if (
+  interaction.customId.startsWith("guild_roster_next_") ||
+  interaction.customId.startsWith("guild_roster_prev_")
+) {
+  const fs = require("fs");
+  const path = require("path");
+  const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+
+  const rosterPath = path.join(__dirname, "../data/guildRoster.json");
+  const data = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
+
+  const members = data.members || [];
+  const totalPages = Math.ceil(members.length / 15);
+
+  const parts = interaction.customId.split("_");
+  const direction = parts[2];
+  const currentPage = Number(parts[3]);
+
+  let newPage = direction === "next" ? currentPage + 1 : currentPage - 1;
+  if (newPage < 0) newPage = 0;
+  if (newPage >= totalPages) newPage = totalPages - 1;
+
+  const embed = new EmbedBuilder()
+    .setTitle("📋 Stormforged Guild Roster")
+    .setColor(0x5865F2)
+    .addFields(
+      { name: "👥 Total Members", value: `${members.length}`, inline: true },
+      {
+        name: `📖 Full Roster — Page ${newPage + 1}/${totalPages}`,
+        value: formatMemberTable(members, newPage),
+        inline: false
+      }
+    )
+    .setFooter({ text: "Stormforged Guild Monitor" })
+    .setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`guild_roster_prev_${newPage}`)
+      .setLabel("Previous")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(newPage === 0),
+
+    new ButtonBuilder()
+      .setCustomId(`guild_roster_next_${newPage}`)
+      .setLabel("Next")
+      .setStyle(ButtonStyle.Primary)
+      .setDisabled(newPage >= totalPages - 1)
+  );
+
+  return interaction.update({
+    embeds: [embed],
+    components: [row]
+  });
+}
+      
       if (interaction.customId === "start_verify") {
 
         const modal = new ModalBuilder()
