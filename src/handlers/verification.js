@@ -61,7 +61,8 @@ async function verifyUser(interaction, username, config) {
   const guildRoleMap = {
   stormforged: "1446487749795250246",
   ravens: "1456027015194083472",
-  solaris: "1501252106584199219"
+  solaris: "1501252106584199219",
+  vanaheim: "1505597648240119908"
 };
 
 const aqwGuild = result.guild?.toLowerCase().trim();
