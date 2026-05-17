@@ -260,29 +260,7 @@ if (interaction.commandName === "guildsync") {
 
   const isAdmin = interaction.member.permissions.has("Administrator");
   const hasRole = interaction.member.roles.cache.has(allowedRole);
-function formatMemberTable(members, page = 0, perPage = 15) {
-  if (!members.length) return "No members found.";
 
-  const start = page * perPage;
-  const pageMembers = members.slice(start, start + perPage);
-
-  const rows = pageMembers.map(m => {
-    const name = m.name.length > 18 ? m.name.slice(0, 17) + "…" : m.name;
-    const rank = m.rank.padEnd(7, " ");
-    const level = String(m.level).padEnd(3, " ");
-    const status = m.status.length > 14 ? m.status.slice(0, 13) + "…" : m.status;
-
-    return `${name.padEnd(19, " ")} ${rank} ${level} ${status}`;
-  });
-
-  return (
-    "```text\n" +
-    "Name                Rank    Lv  Last/Server\n" +
-    "--------------------------------------------\n" +
-    rows.join("\n") +
-    "\n```"
-  );
-}
   if (!isAdmin && !hasRole) {
     return interaction.reply({
       content: "❌ No permission.",
@@ -446,6 +424,29 @@ await interaction.editReply({
   embeds: [embed],
   components: [row]
 });
+}
+function formatMemberTable(members, page = 0, perPage = 15) {
+  if (!members.length) return "No members found.";
+
+  const start = page * perPage;
+  const pageMembers = members.slice(start, start + perPage);
+
+  const rows = pageMembers.map(m => {
+    const name = m.name.length > 18 ? m.name.slice(0, 17) + "…" : m.name;
+    const rank = m.rank.padEnd(7, " ");
+    const level = String(m.level).padEnd(3, " ");
+    const status = m.status.length > 14 ? m.status.slice(0, 13) + "…" : m.status;
+
+    return `${name.padEnd(19, " ")} ${rank} ${level} ${status}`;
+  });
+
+  return (
+    "```text\n" +
+    "Name                Rank    Lv  \n" +
+    "--------------------------------------------\n" +
+    rows.join("\n") +
+    "\n```"
+  );
 }
 if (interaction.commandName === "editannounce") {
   const allowedRole = "1448328583020941423";
@@ -629,8 +630,7 @@ log(
   }
 }
     // BUTTON
-    if (interaction.isButton()) {
-      if (
+    if (
   interaction.customId.startsWith("guild_roster_next_") ||
   interaction.customId.startsWith("guild_roster_prev_")
 ) {
@@ -649,6 +649,7 @@ log(
   const currentPage = Number(parts[3]);
 
   let newPage = direction === "next" ? currentPage + 1 : currentPage - 1;
+
   if (newPage < 0) newPage = 0;
   if (newPage >= totalPages) newPage = totalPages - 1;
 
