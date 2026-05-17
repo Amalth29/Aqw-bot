@@ -249,7 +249,162 @@ if (interaction.commandName === "announce") {
     ephemeral: true
   });
 }
+if (interaction.commandName === "guildsync") {
+  const fs = require("fs");
+  const path = require("path");
+  const { EmbedBuilder } = require("discord.js");
 
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const attachment = interaction.options.getAttachment("file");
+
+  if (!attachment.name.endsWith(".txt")) {
+    return interaction.reply({
+      content: "❌ Please upload a `.txt` file.",
+      ephemeral: true
+    });
+  }
+
+  await interaction.deferReply();
+
+  const response = await fetch(attachment.url);
+  const text = await response.text();
+
+  const dataDir = path.join(__dirname, "../data");
+  const rosterPath = path.join(dataDir, "guildRoster.json");
+
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir);
+  }
+
+  function parseGuildFile(text) {
+    const lines = text.split(/\r?\n/);
+
+    const members = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      if (
+        !trimmed ||
+        trimmed.startsWith("Guild Members") ||
+        trimmed.startsWith("-") ||
+        trimmed.startsWith("Name") ||
+        trimmed.startsWith("Total Members")
+      ) {
+        continue;
+      }
+
+      const match = trimmed.match(/^(.+?)\s+(Leader|Officer|Member)\s+(\d+)\s+(.+)$/i);
+
+      if (!match) continue;
+
+      members.push({
+        name: match[1].trim(),
+        rank: match[2].trim(),
+        level: Number(match[3]),
+        status: match[4].trim()
+      });
+    }
+
+    return members;
+  }
+
+  function keyName(name) {
+    return name.toLowerCase().trim();
+  }
+
+  const newMembers = parseGuildFile(text);
+
+  const oldData = fs.existsSync(rosterPath)
+    ? JSON.parse(fs.readFileSync(rosterPath, "utf8"))
+    : { members: [] };
+
+  const oldMembers = oldData.members || [];
+
+  const oldMap = new Map(oldMembers.map(m => [keyName(m.name), m]));
+  const newMap = new Map(newMembers.map(m => [keyName(m.name), m]));
+
+  const joined = [];
+  const removed = [];
+  const rankChanged = [];
+  const levelChanged = [];
+  const statusChanged = [];
+
+  for (const member of newMembers) {
+    const old = oldMap.get(keyName(member.name));
+
+    if (!old) {
+      joined.push(member);
+      continue;
+    }
+
+    if (old.rank !== member.rank) {
+      rankChanged.push({ old, current: member });
+    }
+
+    if (old.level !== member.level) {
+      levelChanged.push({ old, current: member });
+    }
+
+    if (old.status !== member.status) {
+      statusChanged.push({ old, current: member });
+    }
+  }
+
+  for (const member of oldMembers) {
+    if (!newMap.has(keyName(member.name))) {
+      removed.push(member);
+    }
+  }
+
+  const savedData = {
+    syncedAt: new Date().toISOString(),
+    totalMembers: newMembers.length,
+    members: newMembers
+  };
+
+  fs.writeFileSync(rosterPath, JSON.stringify(savedData, null, 2));
+
+  function listNames(arr, limit = 10) {
+    if (arr.length === 0) return "None";
+
+    return arr
+      .slice(0, limit)
+      .map(m => `• ${m.name} — ${m.rank}, Lv ${m.level}, ${m.status}`)
+      .join("\n") + (arr.length > limit ? `\n…and ${arr.length - limit} more` : "");
+  }
+
+  const embed = new EmbedBuilder()
+    .setTitle("📋 Stormforged Guild Roster Synced")
+    .setColor(0x5865F2)
+    .addFields(
+      { name: "👥 Total Members", value: `${newMembers.length}`, inline: true },
+      { name: "🆕 New Members", value: `${joined.length}`, inline: true },
+      { name: "🚪 Removed Members", value: `${removed.length}`, inline: true },
+      { name: "🎖️ Rank Changes", value: `${rankChanged.length}`, inline: true },
+      { name: "📈 Level Changes", value: `${levelChanged.length}`, inline: true },
+      { name: "🌐 Status/Server Changes", value: `${statusChanged.length}`, inline: true },
+      { name: "🆕 Joined", value: listNames(joined), inline: false },
+      { name: "🚪 Removed", value: listNames(removed), inline: false }
+    )
+    .setFooter({ text: "Stormforged Guild Monitor" })
+    .setTimestamp();
+
+  await interaction.editReply({
+    embeds: [embed]
+  });
+}
 if (interaction.commandName === "editannounce") {
   const allowedRole = "1448328583020941423";
 

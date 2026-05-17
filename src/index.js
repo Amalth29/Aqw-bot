@@ -65,6 +65,18 @@ await client.application.commands.create({
   ]
 });
 await client.application.commands.create({
+  name: "guildsync",
+  description: "Upload and sync AQW guild member list",
+  options: [
+    {
+      name: "file",
+      description: "Upload guild_members.txt",
+      type: 11,
+      required: true
+    }
+  ]
+});
+await client.application.commands.create({
   name: "say",
   description: "Send a message as the bot to a selected channel",
   options: [
