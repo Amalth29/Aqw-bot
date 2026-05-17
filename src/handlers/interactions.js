@@ -251,6 +251,59 @@ if (interaction.commandName === "announce") {
     ephemeral: true
   });
 }
+if (interaction.commandName === "guildroster") {
+  const fs = require("fs");
+  const path = require("path");
+  const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+
+  const rosterPath = path.join(__dirname, "../data/guildRoster.json");
+
+  if (!fs.existsSync(rosterPath)) {
+    return interaction.reply({
+      content: "❌ No roster saved yet. Use `/guildsync` first.",
+      ephemeral: true
+    });
+  }
+
+  const data = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
+  const members = data.members || [];
+
+  const page = 0;
+  const totalPages = Math.ceil(members.length / 15);
+
+  const embed = new EmbedBuilder()
+    .setTitle("📋 Stormforged Guild Roster")
+    .setColor(0x5865F2)
+    .addFields(
+      { name: "👥 Total Members", value: `${members.length}`, inline: true },
+      {
+        name: `📖 Full Roster — Page ${page + 1}/${totalPages}`,
+        value: formatMemberTable(members, page),
+        inline: false
+      }
+    )
+    .setFooter({ text: "Stormforged Guild Monitor" })
+    .setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`guild_roster_prev_${page}`)
+      .setLabel("Previous")
+      .setStyle(ButtonStyle.Secondary)
+      .setDisabled(true),
+
+    new ButtonBuilder()
+      .setCustomId(`guild_roster_next_${page}`)
+      .setLabel("Next")
+      .setStyle(ButtonStyle.Primary)
+      .setDisabled(totalPages <= 1)
+  );
+
+  return interaction.reply({
+    embeds: [embed],
+    components: [row]
+  });
+}
 if (interaction.commandName === "guildsync") {
   const fs = require("fs");
   const path = require("path");
@@ -391,38 +444,19 @@ if (interaction.commandName === "guildsync") {
 const totalPages = Math.ceil(newMembers.length / 15);
 
 const embed = new EmbedBuilder()
-  .setTitle("📋 Stormforged Guild Roster Synced")
-  .setColor(0x5865F2)
+  .setTitle("✅ Guild Roster Synced")
+  .setColor(0x57F287)
   .addFields(
     { name: "👥 Total Members", value: `${newMembers.length}`, inline: true },
     { name: "🆕 New Members", value: `${joined.length}`, inline: true },
-    { name: "🚪 Removed Members", value: `${removed.length}`, inline: true },
-    {
-      name: `📖 Full Roster — Page ${page + 1}/${totalPages}`,
-      value: formatMemberTable(newMembers, page),
-      inline: false
-    }
+    { name: "🚪 Removed Members", value: `${removed.length}`, inline: true }
   )
-  .setFooter({ text: "Stormforged Guild Monitor" })
+  .setFooter({ text: "Use /guildroster to view the full roster" })
   .setTimestamp();
 
-const row = new ActionRowBuilder().addComponents(
-  new ButtonBuilder()
-    .setCustomId("guild_roster_prev_0")
-    .setLabel("Previous")
-    .setStyle(ButtonStyle.Secondary)
-    .setDisabled(true),
-
-  new ButtonBuilder()
-    .setCustomId("guild_roster_next_0")
-    .setLabel("Next")
-    .setStyle(ButtonStyle.Primary)
-    .setDisabled(totalPages <= 1)
-);
-
-await interaction.editReply({
+return interaction.editReply({
   embeds: [embed],
-  components: [row]
+  components: []
 });
 }
 function formatMemberTable(members, page = 0, perPage = 15) {
@@ -432,18 +466,17 @@ function formatMemberTable(members, page = 0, perPage = 15) {
   const pageMembers = members.slice(start, start + perPage);
 
   const rows = pageMembers.map(m => {
-    const name = m.name.length > 18 ? m.name.slice(0, 17) + "…" : m.name;
-    const rank = m.rank.padEnd(7, " ");
+    const name = m.name.length > 24 ? m.name.slice(0, 23) + "…" : m.name;
+    const rank = m.rank.padEnd(8, " ");
     const level = String(m.level).padEnd(3, " ");
-    const status = m.status.length > 14 ? m.status.slice(0, 13) + "…" : m.status;
 
-    return `${name.padEnd(19, " ")} ${rank} ${level} ${status}`;
+    return `${name.padEnd(25, " ")} ${rank} ${level}`;
   });
 
   return (
     "```text\n" +
-    "Name                Rank    Lv  \n" +
-    "--------------------------------------------\n" +
+    "Name                      Rank     Lv\n" +
+    "--------------------------------------\n" +
     rows.join("\n") +
     "\n```"
   );

@@ -65,6 +65,10 @@ await client.application.commands.create({
   ]
 });
 await client.application.commands.create({
+  name: "guildroster",
+  description: "Display the saved guild roster"
+});
+await client.application.commands.create({
   name: "guildsync",
   description: "Upload and sync AQW guild member list",
   options: [
