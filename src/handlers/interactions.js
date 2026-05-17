@@ -93,8 +93,68 @@ module.exports = (client) => {
   }
 }
 if (interaction.isChatInputCommand()) {
+  if (interaction.commandName === "exportrole") {
+  const fs = require("fs");
+  const path = require("path");
+  const { AttachmentBuilder } = require("discord.js");
+
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  const role = interaction.options.getRole("role");
+
+  const members = role.members
+    .map(member => {
+      return {
+        discordName: member.user.tag,
+        nickname: member.nickname || "No Nickname",
+        id: member.id
+      };
+    })
+    .sort((a, b) => a.nickname.localeCompare(b.nickname));
+
+  let content = "";
+  content += `Role Export: ${role.name}\n`;
+  content += `Total Members: ${members.length}\n`;
+  content += `========================================\n\n`;
+
+  for (const member of members) {
+    content += `Nickname: ${member.nickname}\n`;
+    content += `Discord: ${member.discordName}\n`;
+    content += `ID: ${member.id}\n`;
+    content += `----------------------------------------\n`;
+  }
+
+  const exportDir = path.join(__dirname, "../exports");
+
+  if (!fs.existsSync(exportDir)) {
+    fs.mkdirSync(exportDir);
+  }
+
+  const filePath = path.join(exportDir, `role_export_${Date.now()}.txt`);
+
+  fs.writeFileSync(filePath, content);
+
+  const attachment = new AttachmentBuilder(filePath);
+
+  return interaction.editReply({
+    content: `✅ Exported ${members.length} users from ${role}.`,
+    files: [attachment]
+  });
+}
   if (interaction.commandName === "announce") {
-  const allowedRole = "YOUR_STAFF_ROLE_ID";
+  const allowedRole = "1448328583020941423";
 
   const isAdmin = interaction.member.permissions.has("Administrator");
   const hasRole = interaction.member.roles.cache.has(allowedRole);

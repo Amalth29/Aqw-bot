@@ -81,6 +81,18 @@ await client.application.commands.create({
   ]
 });
 await client.application.commands.create({
+  name: "exportrole",
+  description: "Export all users with a specific role",
+  options: [
+    {
+      name: "role",
+      description: "Role to export",
+      type: 8,
+      required: true
+    }
+  ]
+});
+await client.application.commands.create({
   name: "say",
   description: "Send a message as the bot to a selected channel",
   options: [
