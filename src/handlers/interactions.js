@@ -442,7 +442,7 @@ function formatMemberTable(members, page = 0, perPage = 15) {
 
   return (
     "```text\n" +
-    "Name                Rank    Lv  Last/Server\n" +
+    "Name                Rank    Lv  \n" +
     "--------------------------------------------\n" +
     rows.join("\n") +
     "\n```"
