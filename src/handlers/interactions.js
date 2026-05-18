@@ -115,7 +115,7 @@ if (interaction.isChatInputCommand()) {
   const role = interaction.options.getRole("role");
 
   await interaction.guild.members.fetch();
-  
+
   const members = role.members
     .map(member => {
       return {
@@ -318,7 +318,7 @@ if (interaction.commandName === "guildroster") {
   const path = require("path");
   const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-  const rosterPath = path.join(__dirname, "../data/guildRoster.json");
+  const rosterPath = path.join(dataDir, "guildRoster.json");
 
   if (!fs.existsSync(rosterPath)) {
     return interaction.reply({
@@ -397,7 +397,7 @@ if (interaction.commandName === "guildsync") {
   const response = await fetch(attachment.url);
   const text = await response.text();
 
-  const dataDir = path.join(__dirname, "../data");
+  const dataDir = "/data"
   const rosterPath = path.join(dataDir, "guildRoster.json");
 
   if (!fs.existsSync(dataDir)) {
@@ -734,7 +734,7 @@ log(
   const path = require("path");
   const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-  const rosterPath = path.join(__dirname, "../data/guildRoster.json");
+  const rosterPath = path.join(dataDir, "guildRoster.json");
   const data = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
 
   const members = data.members || [];

@@ -18,7 +18,8 @@ if (message.content === "!syncnames") {
   const fs = require("fs");
   const path = require("path");
 
-  const dbPath = path.join(__dirname, "../data/verifiedUsers.json");
+ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
+ const dbPath = path.join(DATA_DIR, "verifiedUsers.json");
 
   const verifiedUsers = fs.existsSync(dbPath)
     ? JSON.parse(fs.readFileSync(dbPath, "utf8"))

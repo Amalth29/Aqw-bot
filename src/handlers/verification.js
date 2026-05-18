@@ -2,7 +2,8 @@ const fs = require("fs");
 const path = require("path");
 const checkAQWUser = require("../utils/aqwCheck");
 
-const dbPath = path.join(__dirname, "../data/verifiedUsers.json");
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
+const dbPath = path.join(DATA_DIR, "verifiedUsers.json");
 
 
 
