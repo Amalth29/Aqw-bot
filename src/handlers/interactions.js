@@ -17,7 +17,7 @@ const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
-
+const guildRosterPath = path.join(DATA_DIR, "guildRoster.json");
 
 const config = require("../config");
 const embeds = require("../utils/embeds");
@@ -408,8 +408,8 @@ if (interaction.commandName === "guildsync") {
 
   
 
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir);
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR);
   }
 
   function parseGuildFile(text) {
