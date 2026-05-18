@@ -9,6 +9,16 @@ const {
   ActionRowBuilder
 } = require("discord.js");
 
+const fs = require("fs");
+const path = require("path");
+
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
+
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
+}
+
+
 const config = require("../config");
 const embeds = require("../utils/embeds");
 const { verifyUser } = require("./verification");
@@ -138,7 +148,7 @@ if (interaction.isChatInputCommand()) {
     content += `----------------------------------------\n`;
   }
 
-  const exportDir = path.join(__dirname, "../exports");
+  const exportDir = path.join(DATA_DIR, "exports");
 
   if (!fs.existsSync(exportDir)) {
     fs.mkdirSync(exportDir);
@@ -318,16 +328,15 @@ if (interaction.commandName === "guildroster") {
   const path = require("path");
   const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-  const rosterPath = path.join(dataDir, "guildRoster.json");
 
-  if (!fs.existsSync(rosterPath)) {
+  if (!fs.existsSync(guildRosterPath)) {
     return interaction.reply({
       content: "❌ No roster saved yet. Use `/guildsync` first.",
       ephemeral: true
     });
   }
 
-  const data = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
+  const data = JSON.parse(fs.readFileSync(guildRosterPath, "utf8"));
   const members = data.members || [];
 
   const page = 0;
@@ -397,8 +406,7 @@ if (interaction.commandName === "guildsync") {
   const response = await fetch(attachment.url);
   const text = await response.text();
 
-  const dataDir = "/data"
-  const rosterPath = path.join(dataDir, "guildRoster.json");
+  
 
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir);
@@ -443,8 +451,8 @@ if (interaction.commandName === "guildsync") {
 
   const newMembers = parseGuildFile(text);
 
-  const oldData = fs.existsSync(rosterPath)
-    ? JSON.parse(fs.readFileSync(rosterPath, "utf8"))
+  const oldData = fs.existsSync(guildRosterPath)
+    ? JSON.parse(fs.readFileSync(guildRosterPath, "utf8"))
     : { members: [] };
 
   const oldMembers = oldData.members || [];
@@ -491,7 +499,7 @@ if (interaction.commandName === "guildsync") {
     members: newMembers
   };
 
-  fs.writeFileSync(rosterPath, JSON.stringify(savedData, null, 2));
+  fs.writeFileSync(guildRosterPath, JSON.stringify(savedData, null, 2));
 
   function listNames(arr, limit = 10) {
     if (arr.length === 0) return "None";
@@ -734,8 +742,8 @@ log(
   const path = require("path");
   const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
-  const rosterPath = path.join(dataDir, "guildRoster.json");
-  const data = JSON.parse(fs.readFileSync(rosterPath, "utf8"));
+  
+  const data = JSON.parse(fs.readFileSync(guildRosterPath, "utf8"));
 
   const members = data.members || [];
   const totalPages = Math.ceil(members.length / 15);
