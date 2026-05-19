@@ -11,7 +11,8 @@ function isImageAttachment(attachment) {
   return attachment.contentType?.startsWith("image/");
 }
   client.on("messageCreate", async (message) => {
-   
+
+    if (message.author.bot) return;
 const hasImages =
   message.attachments.size > 0 ||
   message.embeds.some(embed =>
