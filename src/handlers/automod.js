@@ -12,7 +12,14 @@ function isImageAttachment(attachment) {
 }
   client.on("messageCreate", async (message) => {
    
-const hasImages = message.attachments.some(isImageAttachment);
+const hasImages =
+  message.attachments.size > 0 ||
+  message.embeds.some(embed =>
+    embed.image ||
+    embed.thumbnail ||
+    embed.url?.match(/\.(png|jpg|jpeg|gif|webp)$/i)
+  ) ||
+  message.content.match(/\.(png|jpg|jpeg|gif|webp)/i);
 if (hasImages) {
   const now = Date.now();
   const userId = message.author.id;
@@ -62,6 +69,9 @@ if (hasImages) {
 
     if (!message.guild) return;
     if (message.author.bot) return;
+    console.log(
+  `[AUTOMOD DEBUG] ${message.author.tag} attachments=${message.attachments.size} embeds=${message.embeds.length} content=${message.content}`
+);
 
     // Ignore admins
     if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
