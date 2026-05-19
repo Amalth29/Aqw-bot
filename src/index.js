@@ -1,6 +1,17 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const config = require("./config");
 
+// pinging the bot to keep it alive
+const express = require("express");
+const app = express();
+
+app.get("/ping", (req, res) => res.send("OK"));
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, "0.0.0.0", () => {  // "0.0.0.0" is important!
+  console.log(`Keep-alive server running on port ${PORT}`);
+});
+//
 const client = new Client({
 
   intents: [
