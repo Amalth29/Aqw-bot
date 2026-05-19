@@ -2,10 +2,63 @@ const { EmbedBuilder, PermissionsBitField } = require("discord.js");
 const config = require("../config");
 
 const userMessages = new Map();
+const imageSpamMap = new Map();
 
+function isImageAttachment(attachment) {
+  return attachment.contentType?.startsWith("image/");
+}
+const hasImages = message.attachments.some(isImageAttachment);
 module.exports = (client) => {
-
+ 
   client.on("messageCreate", async (message) => {
+   
+
+if (hasImages) {
+  const now = Date.now();
+  const userId = message.author.id;
+
+  if (!imageSpamMap.has(userId)) {
+    imageSpamMap.set(userId, []);
+  }
+
+  const recentImages = imageSpamMap.get(userId);
+
+  recentImages.push({
+    messageId: message.id,
+    channelId: message.channel.id,
+    time: now
+  });
+
+  const filtered = recentImages.filter(item => now - item.time < 30000);
+  imageSpamMap.set(userId, filtered);
+
+  const uniqueChannels = new Set(filtered.map(item => item.channelId));
+
+  if (filtered.length >= 2 && uniqueChannels.size >= 2) {
+    for (const item of filtered) {
+      const channel = message.guild.channels.cache.get(item.channelId);
+      if (!channel) continue;
+
+      const msg = await channel.messages.fetch(item.messageId).catch(() => null);
+      if (msg) await msg.delete().catch(() => {});
+    }
+
+    await message.member.timeout(
+      10 * 60 * 1000,
+      "Possible hacked account image spam"
+    ).catch(() => {});
+
+    const logChannel = message.guild.channels.cache.get(config.LOG_CHANNEL_ID);
+
+    if (logChannel) {
+      logChannel.send(
+        `🚨 Possible hacked account detected: ${message.author}\nReason: Image spam across multiple channels.`
+      );
+    }
+
+    return;
+  }
+}
 
     if (!message.guild) return;
     if (message.author.bot) return;
