@@ -5,10 +5,11 @@ const config = require("./config");
 const express = require("express");
 const app = express();
 
+app.get("/", (req, res) => res.send("OK"));
 app.get("/ping", (req, res) => res.send("OK"));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, "0.0.0.0", () => {  // "0.0.0.0" is important!
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Keep-alive server running on port ${PORT}`);
 });
 //

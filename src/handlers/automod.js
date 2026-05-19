@@ -12,7 +12,7 @@ function isImageAttachment(attachment) {
 }
   client.on("messageCreate", async (message) => {
    
-
+const hasImages = message.attachments.some(isImageAttachment);
 if (hasImages) {
   const now = Date.now();
   const userId = message.author.id;
