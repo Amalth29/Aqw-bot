@@ -2,14 +2,14 @@ const { EmbedBuilder, PermissionsBitField } = require("discord.js");
 const config = require("../config");
 
 const userMessages = new Map();
-const imageSpamMap = new Map();
+
+
+module.exports = (client) => {
+ const imageSpamMap = new Map();
 
 function isImageAttachment(attachment) {
   return attachment.contentType?.startsWith("image/");
 }
-const hasImages = message.attachments.some(isImageAttachment);
-module.exports = (client) => {
- 
   client.on("messageCreate", async (message) => {
    
 
