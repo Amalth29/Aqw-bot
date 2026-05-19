@@ -69,9 +69,7 @@ if (hasImages) {
 
     if (!message.guild) return;
     if (message.author.bot) return;
-    console.log(
-  `[AUTOMOD DEBUG] ${message.author.tag} attachments=${message.attachments.size} embeds=${message.embeds.length} content=${message.content}`
-);
+    
 
     // Ignore admins
     if (message.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
