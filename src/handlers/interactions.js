@@ -535,7 +535,7 @@ function formatMemberTable(members, page = 0, perPage = 15) {
   const start = page * perPage;
   const pageMembers = members.slice(start, start + perPage);
 
-  const rows = pageMembers.map(m => {
+const rows = pageMembers.map(m => {
   const name =
     m.name.length > 18
       ? m.name.slice(0, 17) + "…"
@@ -555,6 +555,7 @@ return (
   rows.join("\n") +
   "\n```"
 );
+}
 if (interaction.commandName === "editannounce") {
   const allowedRole = "1448328583020941423";
 
