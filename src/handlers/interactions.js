@@ -536,21 +536,25 @@ function formatMemberTable(members, page = 0, perPage = 15) {
   const pageMembers = members.slice(start, start + perPage);
 
   const rows = pageMembers.map(m => {
-    const name = m.name.length > 24 ? m.name.slice(0, 23) + "…" : m.name;
-    const rank = m.rank.padEnd(8, " ");
-    const level = String(m.level).padEnd(3, " ");
-
-    return `${name.padEnd(25, " ")} ${rank} ${level}`;
-  });
+  const name =
+    m.name.length > 18
+      ? m.name.slice(0, 17) + "…"
+      : m.name;
 
   return (
-    "```text\n" +
-    "Name                  Rank     Lv\n" +
-    "--------------------------------\n" +
-    rows.join("\n") +
-    "\n```"
+    name.padEnd(20, " ") +
+    m.rank.padEnd(10, " ") +
+    String(m.level)
   );
-}
+});
+
+return (
+  "```text\n" +
+  "Name                Rank      Lv\n" +
+  "--------------------------------------\n" +
+  rows.join("\n") +
+  "\n```"
+);
 if (interaction.commandName === "editannounce") {
   const allowedRole = "1448328583020941423";
 
