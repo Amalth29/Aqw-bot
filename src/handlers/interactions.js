@@ -375,6 +375,29 @@ if (interaction.commandName === "guildroster") {
     components: [row]
   });
 }
+function getInactiveMembers(members, days = 15) {
+  const now = new Date();
+  const inactive = [];
+
+  for (const member of members) {
+    const status = member.status;
+
+    // Ignore online server names like Artix/Safiria/Yorumi
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(status)) continue;
+
+    const lastOnline = new Date(status);
+    const diffDays = Math.floor((now - lastOnline) / (1000 * 60 * 60 * 24));
+
+    if (diffDays >= days) {
+      inactive.push({
+        ...member,
+        inactiveDays: diffDays
+      });
+    }
+  }
+
+  return inactive.sort((a, b) => b.inactiveDays - a.inactiveDays);
+}
 if (interaction.commandName === "guildsync") {
   const fs = require("fs");
   const path = require("path");
@@ -450,6 +473,29 @@ if (interaction.commandName === "guildsync") {
   }
 
   const newMembers = parseGuildFile(text);
+  const inactiveMembers = getInactiveMembers(newMembers, 15);
+
+const inactiveChannel = interaction.guild.channels.cache.get(
+  config.INACTIVE_LOG_CHANNEL_ID
+);
+
+if (inactiveChannel && inactiveMembers.length > 0) {
+  const list = inactiveMembers
+    .slice(0, 30)
+    .map(m => `• **${m.name}** — Lv ${m.level} — ${m.inactiveDays} days inactive`)
+    .join("\n");
+
+  const embed = new EmbedBuilder()
+    .setTitle("🕒 Inactive Guild Members")
+    .setColor(0xED4245)
+    .setDescription(list)
+    .setFooter({
+      text: `Showing ${Math.min(inactiveMembers.length, 30)} of ${inactiveMembers.length} inactive members`
+    })
+    .setTimestamp();
+
+  await inactiveChannel.send({ embeds: [embed] });
+}
 
   const oldData = fs.existsSync(guildRosterPath)
     ? JSON.parse(fs.readFileSync(guildRosterPath, "utf8"))
