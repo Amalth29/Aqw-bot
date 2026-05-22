@@ -195,10 +195,7 @@ for (const msgData of sameMessages) {
         });
       }
 
-      // DM user
-      await message.author.send(
-        "⚠️ Your account was automatically timed out due to suspected spam/hacked-account behavior. Please contact staff if this was a mistake."
-      ).catch(() => {});
+  
 
     } catch (err) {
       console.error("Automod error:", err);
