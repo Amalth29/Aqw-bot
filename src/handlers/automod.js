@@ -42,7 +42,7 @@ if (hasImages) {
 
   const uniqueChannels = new Set(filtered.map(item => item.channelId));
 
-  if (filtered.length >= 2 && uniqueChannels.size >= 3) {
+  if (filtered.length >= 3 && uniqueChannels.size >= 3) {
     for (const item of filtered) {
       const channel = message.guild.channels.cache.get(item.channelId);
       if (!channel) continue;
