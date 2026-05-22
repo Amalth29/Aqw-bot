@@ -20,7 +20,11 @@ const hasImages =
     embed.thumbnail ||
     embed.url?.match(/\.(png|jpg|jpeg|gif|webp)$/i)
   ) ||
+  (message.messageSnapshots?.size || 0) > 0 ||
   message.content.match(/\.(png|jpg|jpeg|gif|webp)/i);
+  console.log(
+  `[AUTOMOD DEBUG] ${message.author.tag} attachments=${message.attachments.size} embeds=${message.embeds.length} snapshots=${message.messageSnapshots?.size || 0}`
+);
 if (hasImages) {
   const now = Date.now();
   const userId = message.author.id;
@@ -55,6 +59,12 @@ if (hasImages) {
       10 * 60 * 1000,
       "Possible hacked account image spam"
     ).catch(() => {});
+
+    await message.author.send(
+  "⚠️ You were automatically timed out because your account appeared to be sending image spam across multiple channels. If this was a mistake, please contact a moderator."
+).catch(err => {
+  console.log(`[AUTOMOD] Could not DM ${message.author.tag}: ${err.message}`);
+});
 
     const logChannel = message.guild.channels.cache.get(config.LOG_CHANNEL_ID);
 
