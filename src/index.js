@@ -7,6 +7,7 @@ const fs = require("fs");
 const path = require("path");
 const app = express();
 
+const PORT = process.env.PORT || 3000;
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const guildRosterPath = path.join(DATA_DIR, "guildRoster.json");
@@ -36,7 +37,7 @@ app.listen(PORT, () => {
 app.get("/", (req, res) => res.send("OK"));
 app.get("/ping", (req, res) => res.send("OK"));
 
-const PORT = process.env.PORT || 3000;
+
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`Keep-alive server running on port ${PORT}`);
 });
