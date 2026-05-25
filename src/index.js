@@ -3,7 +3,35 @@ const config = require("./config");
 
 // pinging the bot to keep it alive
 const express = require("express");
+const fs = require("fs");
+const path = require("path");
 const app = express();
+
+
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
+const guildRosterPath = path.join(DATA_DIR, "guildRoster.json");
+
+app.get("/", (req, res) => {
+  res.send("Stormforged bot API is running.");
+});
+
+app.get("/guild-roster", (req, res) => {
+  if (!fs.existsSync(guildRosterPath)) {
+    return res.status(404).json({
+      error: "No guild roster found. Run /guildsync first."
+    });
+  }
+
+  const data = JSON.parse(fs.readFileSync(guildRosterPath, "utf8"));
+
+  res.json(data);
+});
+
+
+
+app.listen(PORT, () => {
+  console.log(`API running on port ${PORT}`);
+});
 
 app.get("/", (req, res) => res.send("OK"));
 app.get("/ping", (req, res) => res.send("OK"));
