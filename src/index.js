@@ -1,11 +1,12 @@
 const { Client, GatewayIntentBits } = require("discord.js");
 const config = require("./config");
-
+const cors = require("cors");
 // pinging the bot to keep it alive
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const app = express();
+app.use(cors());
 
 const PORT = process.env.PORT || 3000;
 
