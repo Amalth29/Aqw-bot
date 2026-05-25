@@ -22,9 +22,6 @@ const hasImages =
   ) ||
   (message.messageSnapshots?.size || 0) > 0 ||
   message.content.match(/\.(png|jpg|jpeg|gif|webp)/i);
-  console.log(
-  `[AUTOMOD DEBUG] ${message.author.tag} attachments=${message.attachments.size} embeds=${message.embeds.length} snapshots=${message.messageSnapshots?.size || 0}`
-);
 if (hasImages) {
   const now = Date.now();
   const userId = message.author.id;
