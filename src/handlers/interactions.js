@@ -236,85 +236,75 @@ if (interaction.isChatInputCommand()) {
 
   return interaction.showModal(modal);
 }
-  if (interaction.commandName === "calendar") {
+if (interaction.commandName === "calendar") {
   const { EmbedBuilder } = require("discord.js");
 
-  const boosts = [
-    { date: "May 1", boost: "ALL", emoji: "🟣", desc: "Double ALL Boost" },
-    { date: "May 2", boost: "Keys", emoji: "🔑", desc: "Members Free Keys" },
-
-    { date: "May 4", boost: "Gold", emoji: "🟡", desc: "Double Gold Boost" },
-    { date: "May 5", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
-    { date: "May 6", boost: "Rep", emoji: "🟢", desc: "Double Rep Boost" },
-    { date: "May 7", boost: "Ess", emoji: "✨", desc: "Essences + Totems Boost" },
-    { date: "May 8", boost: "CP", emoji: "🔵", desc: "Double Class Points Boost" },
-
-    { date: "May 11", boost: "EXP", emoji: "⚡", desc: "Double EXP Boost" },
-    { date: "May 12", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
-    { date: "May 13", boost: "Gold", emoji: "🟡", desc: "Double Gold Boost" },
-    { date: "May 15", boost: "Rep", emoji: "🟢", desc: "Double Rep Boost" },
-
-    { date: "May 18", boost: "CP", emoji: "🔵", desc: "Double Class Points Boost" },
-    { date: "May 19", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
-    { date: "May 20", boost: "EXP", emoji: "⚡", desc: "Double EXP Boost" },
-    { date: "May 22", boost: "Gold", emoji: "🟡", desc: "Double Gold Boost" },
-
-    { date: "May 25", boost: "Rep", emoji: "🟢", desc: "Double Rep Boost" },
-    { date: "May 26", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
-    { date: "May 27", boost: "CP", emoji: "🔵", desc: "Double Class Points Boost" },
-    { date: "May 29", boost: "ALL", emoji: "🟣", desc: "Double ALL Boost" },
-  ];
-
-  const weekOne = boosts.filter(b => ["May 1", "May 2"].includes(b.date));
-  const weekTwo = boosts.filter(b => ["May 4", "May 5", "May 6", "May 7", "May 8"].includes(b.date));
-  const weekThree = boosts.filter(b => ["May 11", "May 12", "May 13", "May 15"].includes(b.date));
-  const weekFour = boosts.filter(b => ["May 18", "May 19", "May 20", "May 22"].includes(b.date));
-  const weekFive = boosts.filter(b => ["May 25", "May 26", "May 27", "May 29"].includes(b.date));
-
-  const formatWeek = (items) =>
-    items.map(b => `${b.emoji} **${b.date}** — **${b.boost}**\n${b.desc}`).join("\n\n");
+  const formatWeek = (items) => {
+    return "```text\n" +
+      "Date      Boost\n" +
+      "---------------\n" +
+      items.map(i => `${i.date.padEnd(9)} ${i.boost}`).join("\n") +
+      "\n```";
+  };
 
   const embed = new EmbedBuilder()
     .setTitle("📅 AQW Boost Calendar — May 2026")
     .setColor(0x3b82f6)
-    .setDescription("Clean monthly boost schedule for AQW.")
+    .setDescription("Monthly AQW boost schedule.")
     .addFields(
       {
         name: "Week 1",
-        value: formatWeek(weekOne),
-        inline: false,
+        value: formatWeek([
+          { date: "May 1", boost: "🟣 ALL" },
+          { date: "May 2", boost: "🔑 Keys" },
+        ]),
+        inline: true,
       },
       {
         name: "Week 2",
-        value: formatWeek(weekTwo),
-        inline: false,
+        value: formatWeek([
+          { date: "May 4", boost: "🟡 Gold" },
+          { date: "May 5", boost: "🛠️ MW" },
+          { date: "May 6", boost: "🟢 Rep" },
+          { date: "May 7", boost: "✨ Ess" },
+          { date: "May 8", boost: "🔵 CP" },
+        ]),
+        inline: true,
       },
       {
         name: "Week 3",
-        value: formatWeek(weekThree),
-        inline: false,
+        value: formatWeek([
+          { date: "May 11", boost: "⚡ EXP" },
+          { date: "May 12", boost: "🛠️ MW" },
+          { date: "May 13", boost: "🟡 Gold" },
+          { date: "May 15", boost: "🟢 Rep" },
+        ]),
+        inline: true,
       },
       {
         name: "Week 4",
-        value: formatWeek(weekFour),
-        inline: false,
+        value: formatWeek([
+          { date: "May 18", boost: "🔵 CP" },
+          { date: "May 19", boost: "🛠️ MW" },
+          { date: "May 20", boost: "⚡ EXP" },
+          { date: "May 22", boost: "🟡 Gold" },
+        ]),
+        inline: true,
       },
       {
         name: "Week 5",
-        value: formatWeek(weekFive),
-        inline: false,
+        value: formatWeek([
+          { date: "May 25", boost: "🟢 Rep" },
+          { date: "May 26", boost: "🛠️ MW" },
+          { date: "May 27", boost: "🔵 CP" },
+          { date: "May 29", boost: "🟣 ALL" },
+        ]),
+        inline: true,
       },
       {
         name: "Legend",
         value:
-          "🟣 **ALL** = Double ALL Boost\n" +
-          "⚡ **EXP** = Double EXP Boost\n" +
-          "🟡 **Gold** = Double Gold Boost\n" +
-          "🟢 **Rep** = Double Rep Boost\n" +
-          "🔵 **CP** = Double Class Points Boost\n" +
-          "✨ **Ess** = Essences + Totems Boost\n" +
-          "🛠️ **MW** = Mid-Week Update\n" +
-          "🔑 **Keys** = Members Free Keys",
+          "🟣 ALL • ⚡ EXP • 🟡 Gold • 🟢 Rep • 🔵 CP • ✨ Ess • 🛠️ MW • 🔑 Keys",
         inline: false,
       }
     )
