@@ -236,71 +236,92 @@ if (interaction.isChatInputCommand()) {
 
   return interaction.showModal(modal);
 }
-const {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  EmbedBuilder,
-} = require("discord.js");
+  if (interaction.commandName === "calendar") {
+  const { EmbedBuilder } = require("discord.js");
 
-async function sendBoostCalendar(interaction) {
   const boosts = [
-    { day: "May 1", type: "ALL", color: "🟣" },
-    { day: "May 2", type: "Keys", color: "🟡" },
+    { date: "May 1", boost: "ALL", emoji: "🟣", desc: "Double ALL Boost" },
+    { date: "May 2", boost: "Keys", emoji: "🔑", desc: "Members Free Keys" },
 
-    { day: "May 4", type: "Gold", color: "🟨" },
-    { day: "May 5", type: "MW", color: "🟦" },
-    { day: "May 6", type: "Rep", color: "🟪" },
-    { day: "May 7", type: "Ess", color: "🟩" },
-    { day: "May 8", type: "CP", color: "🟥" },
+    { date: "May 4", boost: "Gold", emoji: "🟡", desc: "Double Gold Boost" },
+    { date: "May 5", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
+    { date: "May 6", boost: "Rep", emoji: "🟢", desc: "Double Rep Boost" },
+    { date: "May 7", boost: "Ess", emoji: "✨", desc: "Essences + Totems Boost" },
+    { date: "May 8", boost: "CP", emoji: "🔵", desc: "Double Class Points Boost" },
 
-    { day: "May 11", type: "EXP", color: "🟩" },
-    { day: "May 12", type: "MW", color: "🟦" },
-    { day: "May 13", type: "Gold", color: "🟨" },
-    { day: "May 15", type: "Rep", color: "🟪" },
+    { date: "May 11", boost: "EXP", emoji: "⚡", desc: "Double EXP Boost" },
+    { date: "May 12", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
+    { date: "May 13", boost: "Gold", emoji: "🟡", desc: "Double Gold Boost" },
+    { date: "May 15", boost: "Rep", emoji: "🟢", desc: "Double Rep Boost" },
 
-    { day: "May 18", type: "CP", color: "🟥" },
-    { day: "May 19", type: "MW", color: "🟦" },
-    { day: "May 20", type: "EXP", color: "🟩" },
-    { day: "May 22", type: "Gold", color: "🟨" },
+    { date: "May 18", boost: "CP", emoji: "🔵", desc: "Double Class Points Boost" },
+    { date: "May 19", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
+    { date: "May 20", boost: "EXP", emoji: "⚡", desc: "Double EXP Boost" },
+    { date: "May 22", boost: "Gold", emoji: "🟡", desc: "Double Gold Boost" },
 
-    { day: "May 25", type: "Rep", color: "🟪" },
-    { day: "May 26", type: "MW", color: "🟦" },
-    { day: "May 27", type: "CP", color: "🟥" },
-    { day: "May 29", type: "ALL", color: "🟣" },
+    { date: "May 25", boost: "Rep", emoji: "🟢", desc: "Double Rep Boost" },
+    { date: "May 26", boost: "MW", emoji: "🛠️", desc: "Mid-Week Update" },
+    { date: "May 27", boost: "CP", emoji: "🔵", desc: "Double Class Points Boost" },
+    { date: "May 29", boost: "ALL", emoji: "🟣", desc: "Double ALL Boost" },
   ];
 
-  const formatted = boosts
-    .map(
-      (b) => `${b.color} **${b.day}** • ${b.type}`
-    )
-    .join("\n");
+  const weekOne = boosts.filter(b => ["May 1", "May 2"].includes(b.date));
+  const weekTwo = boosts.filter(b => ["May 4", "May 5", "May 6", "May 7", "May 8"].includes(b.date));
+  const weekThree = boosts.filter(b => ["May 11", "May 12", "May 13", "May 15"].includes(b.date));
+  const weekFour = boosts.filter(b => ["May 18", "May 19", "May 20", "May 22"].includes(b.date));
+  const weekFive = boosts.filter(b => ["May 25", "May 26", "May 27", "May 29"].includes(b.date));
+
+  const formatWeek = (items) =>
+    items.map(b => `${b.emoji} **${b.date}** — **${b.boost}**\n${b.desc}`).join("\n\n");
 
   const embed = new EmbedBuilder()
-    .setColor("#3b82f6")
     .setTitle("📅 AQW Boost Calendar — May 2026")
-    .setDescription(formatted)
-    .setFooter({
-      text: "Stormforged Guild",
-    })
+    .setColor(0x3b82f6)
+    .setDescription("Clean monthly boost schedule for AQW.")
+    .addFields(
+      {
+        name: "Week 1",
+        value: formatWeek(weekOne),
+        inline: false,
+      },
+      {
+        name: "Week 2",
+        value: formatWeek(weekTwo),
+        inline: false,
+      },
+      {
+        name: "Week 3",
+        value: formatWeek(weekThree),
+        inline: false,
+      },
+      {
+        name: "Week 4",
+        value: formatWeek(weekFour),
+        inline: false,
+      },
+      {
+        name: "Week 5",
+        value: formatWeek(weekFive),
+        inline: false,
+      },
+      {
+        name: "Legend",
+        value:
+          "🟣 **ALL** = Double ALL Boost\n" +
+          "⚡ **EXP** = Double EXP Boost\n" +
+          "🟡 **Gold** = Double Gold Boost\n" +
+          "🟢 **Rep** = Double Rep Boost\n" +
+          "🔵 **CP** = Double Class Points Boost\n" +
+          "✨ **Ess** = Essences + Totems Boost\n" +
+          "🛠️ **MW** = Mid-Week Update\n" +
+          "🔑 **Keys** = Members Free Keys",
+        inline: false,
+      }
+    )
+    .setFooter({ text: "Stormforged AQW Calendar" })
     .setTimestamp();
 
-  const buttons = new ActionRowBuilder().addComponents(
-    new ButtonBuilder()
-      .setCustomId("prev_month")
-      .setLabel("⬅ Previous")
-      .setStyle(ButtonStyle.Secondary),
-
-    new ButtonBuilder()
-      .setCustomId("next_month")
-      .setLabel("Next ➡")
-      .setStyle(ButtonStyle.Primary)
-  );
-
-  await interaction.reply({
-    embeds: [embed],
-    components: [buttons],
-  });
+  return interaction.reply({ embeds: [embed] });
 }
 }
 if (interaction.commandName === "announce") {
