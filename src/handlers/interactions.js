@@ -243,8 +243,7 @@ if (interaction.commandName === "calendar") {
     return "```text\n" +
       "Date      Boost\n" +
       "---------------\n" +
-      items.map(i => `${i.date.padEnd(9)} ${i.boost}`).join("\n") +
-      "\n```";
+      items.map(i => `**${i.date}**  ${i.emoji} ${i.boost}`).join("\n");
   };
 
   const embed = new EmbedBuilder()
@@ -261,16 +260,16 @@ if (interaction.commandName === "calendar") {
         inline: true,
       },
       {
-        name: "Week 2",
-        value: formatWeek([
-          { date: "May 4", boost: "🟡 Gold" },
-          { date: "May 5", boost: "🛠️ MW" },
-          { date: "May 6", boost: "🟢 Rep" },
-          { date: "May 7", boost: "✨ Ess" },
-          { date: "May 8", boost: "🔵 CP" },
-        ]),
-        inline: true,
-      },
+  name: "Week 2",
+  value: formatWeek([
+    { date: "May 4", emoji: "🟡", boost: "Gold" },
+    { date: "May 5", emoji: "🛠️", boost: "MW" },
+    { date: "May 6", emoji: "🟢", boost: "Rep" },
+    { date: "May 7", emoji: "✨", boost: "Ess" },
+    { date: "May 8", emoji: "🔵", boost: "CP" },
+  ]),
+  inline: true,
+},
       {
         name: "Week 3",
         value: formatWeek([
