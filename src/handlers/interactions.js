@@ -240,7 +240,9 @@ if (interaction.commandName === "calendar") {
   const { EmbedBuilder } = require("discord.js");
 
   const formatWeek = (items) =>
-    items.map(i => `${i.emoji} **${i.date}** — ${i.boost}`).join("\n");
+    "```text\n" +
+    items.map(i => `${i.day.padEnd(2)}  ${i.boost}`).join("\n") +
+    "\n```";
 
   const embed = new EmbedBuilder()
     .setTitle("📅 AQW Boost Calendar — May 2026")
@@ -250,55 +252,56 @@ if (interaction.commandName === "calendar") {
       {
         name: "Week 1",
         value: formatWeek([
-          { date: "May 1", emoji: "🟣", boost: "ALL" },
-          { date: "May 2", emoji: "🔑", boost: "Keys" },
+          { day: "1", boost: "ALL" },
+          { day: "2", boost: "Keys" },
         ]),
         inline: true,
       },
       {
         name: "Week 2",
         value: formatWeek([
-          { date: "May 4", emoji: "🟡", boost: "Gold" },
-          { date: "May 5", emoji: "🛠️", boost: "MW" },
-          { date: "May 6", emoji: "🟢", boost: "Rep" },
-          { date: "May 7", emoji: "✨", boost: "Ess" },
-          { date: "May 8", emoji: "🔵", boost: "CP" },
+          { day: "4", boost: "Gold" },
+          { day: "5", boost: "MW" },
+          { day: "6", boost: "Rep" },
+          { day: "7", boost: "Ess" },
+          { day: "8", boost: "CP" },
         ]),
         inline: true,
       },
       {
         name: "Week 3",
         value: formatWeek([
-          { date: "May 11", emoji: "⚡", boost: "EXP" },
-          { date: "May 12", emoji: "🛠️", boost: "MW" },
-          { date: "May 13", emoji: "🟡", boost: "Gold" },
-          { date: "May 15", emoji: "🟢", boost: "Rep" },
+          { day: "11", boost: "EXP" },
+          { day: "12", boost: "MW" },
+          { day: "13", boost: "Gold" },
+          { day: "15", boost: "Rep" },
         ]),
         inline: true,
       },
       {
         name: "Week 4",
         value: formatWeek([
-          { date: "May 18", emoji: "🔵", boost: "CP" },
-          { date: "May 19", emoji: "🛠️", boost: "MW" },
-          { date: "May 20", emoji: "⚡", boost: "EXP" },
-          { date: "May 22", emoji: "🟡", boost: "Gold" },
+          { day: "18", boost: "CP" },
+          { day: "19", boost: "MW" },
+          { day: "20", boost: "EXP" },
+          { day: "22", boost: "Gold" },
         ]),
         inline: true,
       },
       {
         name: "Week 5",
         value: formatWeek([
-          { date: "May 25", emoji: "🟢", boost: "Rep" },
-          { date: "May 26", emoji: "🛠️", boost: "MW" },
-          { date: "May 27", emoji: "🔵", boost: "CP" },
-          { date: "May 29", emoji: "🟣", boost: "ALL" },
+          { day: "25", boost: "Rep" },
+          { day: "26", boost: "MW" },
+          { day: "27", boost: "CP" },
+          { day: "29", boost: "ALL" },
         ]),
         inline: true,
       },
       {
         name: "Legend",
-        value: "🟣 ALL • ⚡ EXP • 🟡 Gold • 🟢 Rep • 🔵 CP • ✨ Ess • 🛠️ MW • 🔑 Keys",
+        value:
+          "🟣 **ALL** • ⚡ **EXP** • 🟡 **Gold** • 🟢 **Rep** • 🔵 **CP** • ✨ **Ess** • 🛠️ **MW** • 🔑 **Keys**",
         inline: false,
       }
     )
