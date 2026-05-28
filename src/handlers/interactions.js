@@ -236,52 +236,72 @@ if (interaction.isChatInputCommand()) {
 
   return interaction.showModal(modal);
 }
-  if (interaction.commandName === "calendar") {
-    const { EmbedBuilder } = require("discord.js");
-const calendarText =
-`        📅 May 2026
-┌─────┬─────┬─────┬─────┬─────┬─────┬─────┐
-│ Sun │ Mon │ Tue │ Wed │ Thu │ Fri │ Sat │
-├─────┼─────┼─────┼─────┼─────┼─────┼─────┤
-│     │     │     │     │     │  1  │  2  │
-│     │     │     │     │     │ ALL │Keys │
-├─────┼─────┼─────┼─────┼─────┼─────┼─────┤
-│  3  │  4  │  5  │  6  │  7  │  8  │  9  │
-│     │Gold │ MW  │ Rep │Ess  │ CP  │     │
-├─────┼─────┼─────┼─────┼─────┼─────┼─────┤
-│ 10  │ 11  │ 12  │ 13  │ 14  │ 15  │ 16  │
-│     │ EXP │ MW  │Gold │     │ Rep │     │
-├─────┼─────┼─────┼─────┼─────┼─────┼─────┤
-│ 17  │ 18  │ 19  │ 20  │ 21  │ 22  │ 23  │
-│     │ CP  │ MW  │ EXP │     │Gold │     │
-├─────┼─────┼─────┼─────┼─────┼─────┼─────┤
-│ 24  │ 25  │ 26  │ 27  │ 28  │ 29  │ 30  │
-│     │ Rep │ MW  │ CP  │     │ ALL │     │
-├─────┼─────┼─────┼─────┼─────┼─────┼─────┤
-│ 31  │     │     │     │     │     │     │
-│     │     │     │     │     │     │     │
-└─────┴─────┴─────┴─────┴─────┴─────┴─────┘`;
-   const embed = new EmbedBuilder()
-  .setTitle("📅 AQW Boost Calendar — May 2026")
-  .setColor(0x5865F2)
-  .setDescription("```text\n" + calendarText + "\n```")
-  .addFields({
-    name: "Legend",
-    value:
-      "🟣 **ALL** = Double ALL Boost\n" +
-      "⚡ **EXP** = Double EXP Boost\n" +
-      "🟡 **Gold** = Double Gold Boost\n" +
-      "🟢 **Rep** = Double Rep Boost\n" +
-      "🔵 **CP** = Double Class Points Boost\n" +
-      "✨ **Ess** = Essences + Totems Boost\n" +
-      "🛠️ **MW** = Mid-Week Update\n" +
-      "🔑 **Keys** = Members Free Keys",
-    inline: false
-  })
-  .setFooter({ text: "Stormforged AQW Calendar" })
-  .setTimestamp();
-    return interaction.reply({ embeds: [embed] });
-  }
+const {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  EmbedBuilder,
+} = require("discord.js");
+
+async function sendBoostCalendar(interaction) {
+  const boosts = [
+    { day: "May 1", type: "ALL", color: "🟣" },
+    { day: "May 2", type: "Keys", color: "🟡" },
+
+    { day: "May 4", type: "Gold", color: "🟨" },
+    { day: "May 5", type: "MW", color: "🟦" },
+    { day: "May 6", type: "Rep", color: "🟪" },
+    { day: "May 7", type: "Ess", color: "🟩" },
+    { day: "May 8", type: "CP", color: "🟥" },
+
+    { day: "May 11", type: "EXP", color: "🟩" },
+    { day: "May 12", type: "MW", color: "🟦" },
+    { day: "May 13", type: "Gold", color: "🟨" },
+    { day: "May 15", type: "Rep", color: "🟪" },
+
+    { day: "May 18", type: "CP", color: "🟥" },
+    { day: "May 19", type: "MW", color: "🟦" },
+    { day: "May 20", type: "EXP", color: "🟩" },
+    { day: "May 22", type: "Gold", color: "🟨" },
+
+    { day: "May 25", type: "Rep", color: "🟪" },
+    { day: "May 26", type: "MW", color: "🟦" },
+    { day: "May 27", type: "CP", color: "🟥" },
+    { day: "May 29", type: "ALL", color: "🟣" },
+  ];
+
+  const formatted = boosts
+    .map(
+      (b) => `${b.color} **${b.day}** • ${b.type}`
+    )
+    .join("\n");
+
+  const embed = new EmbedBuilder()
+    .setColor("#3b82f6")
+    .setTitle("📅 AQW Boost Calendar — May 2026")
+    .setDescription(formatted)
+    .setFooter({
+      text: "Stormforged Guild",
+    })
+    .setTimestamp();
+
+  const buttons = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId("prev_month")
+      .setLabel("⬅ Previous")
+      .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+      .setCustomId("next_month")
+      .setLabel("Next ➡")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  await interaction.reply({
+    embeds: [embed],
+    components: [buttons],
+  });
+}
 }
 if (interaction.commandName === "announce") {
   const allowedRole = "1448328583020941423";
