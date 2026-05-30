@@ -147,6 +147,7 @@ if (interaction.commandName === "addmemory") {
 
   return interaction.editReply("✅ Memory added to website gallery.");
 }
+
 if (interaction.commandName === "deletememory") {
   const allowedRole = "1448328583020941423";
 
@@ -186,6 +187,53 @@ if (interaction.commandName === "deletememory") {
 
   return interaction.editReply(`✅ Deleted memory: **${memory.title || memory.id}**`);
 }
+
+if (interaction.commandName === "listmemories") {
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  if (!fs.existsSync(memoriesPath)) {
+    return interaction.reply({
+      content: "❌ No memories found.",
+      ephemeral: true
+    });
+  }
+
+  const memories = JSON.parse(fs.readFileSync(memoriesPath, "utf8"));
+
+  if (!memories.length) {
+    return interaction.reply({
+      content: "❌ No memories found.",
+      ephemeral: true
+    });
+  }
+
+  const list = memories
+    .slice(0, 20)
+    .map((m, index) => {
+      return (
+        `**${index + 1}. ${m.title || "Untitled"}**\n` +
+        `ID: \`${m.id}\`\n` +
+        `By: ${m.uploadedBy || "Unknown"}`
+      );
+    })
+    .join("\n\n");
+
+  return interaction.reply({
+    content: `📸 **Website Memories**\n\n${list}`,
+    ephemeral: true
+  });
+}
+
 if (interaction.isChatInputCommand()) {
   if (interaction.commandName === "exportrole") {
   const fs = require("fs");

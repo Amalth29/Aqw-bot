@@ -13,23 +13,7 @@ const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const guildRosterPath = path.join(DATA_DIR, "guildRoster.json");
 const memoriesPath = path.join(DATA_DIR, "memories.json");
-if (fs.existsSync(memoriesPath)) {
-  const memories = JSON.parse(fs.readFileSync(memoriesPath, "utf8"));
 
-  let changed = false;
-
-  for (const memory of memories) {
-    if (!memory.id) {
-      memory.id = Date.now().toString() + Math.random().toString(36).slice(2, 6);
-      changed = true;
-    }
-  }
-
-  if (changed) {
-    fs.writeFileSync(memoriesPath, JSON.stringify(memories, null, 2));
-    console.log("✅ Memories migrated with IDs");
-  }
-}
 
 app.get("/memories", (req, res) => {
   if (!fs.existsSync(memoriesPath)) {
@@ -181,8 +165,14 @@ await client.application.commands.create({
     }
   ]
 });
-
 console.log("✅ /deletememory registered");
+
+await client.application.commands.create({
+  name: "listmemories",
+  description: "List website gallery memories and their IDs"
+});
+console.log("✅ /listmemories registered");
+
 await client.application.commands.create({
   name: "exportrole",
   description: "Export all users with a specific role",
