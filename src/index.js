@@ -133,21 +133,25 @@ await client.application.commands.create({
     }
   ]
 });
-new SlashCommandBuilder()
-  .setName("addmemory")
-  .setDescription("Add a guild memory image to the website gallery")
-  .addAttachmentOption(option =>
-    option
-      .setName("image")
-      .setDescription("The image to add")
-      .setRequired(true)
-  )
-  .addStringOption(option =>
-    option
-      .setName("title")
-      .setDescription("Optional memory title")
-      .setRequired(false)
-  )
+await client.application.commands.create({
+  name: "addmemory",
+  description: "Add a guild memory image to the website gallery",
+  options: [
+    {
+      name: "image",
+      description: "The image to add",
+      type: 11, // Attachment
+      required: true
+    },
+    {
+      name: "title",
+      description: "Memory title",
+      type: 3, // String
+      required: false
+    }
+  ]
+});
+console.log(`✅ Registered command: ${cmd.name}`);
 await client.application.commands.create({
   name: "exportrole",
   description: "Export all users with a specific role",
