@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits } = require("discord.js");
+const { Client, GatewayIntentBits, SlashCommandBuilder } = require("discord.js");
 const config = require("./config");
 const cors = require("cors");
 // pinging the bot to keep it alive
@@ -12,6 +12,17 @@ const PORT = process.env.PORT || 3000;
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "data");
 const guildRosterPath = path.join(DATA_DIR, "guildRoster.json");
+const memoriesPath = path.join(DATA_DIR, "memories.json");
+
+app.get("/memories", (req, res) => {
+  if (!fs.existsSync(memoriesPath)) {
+    return res.json([]);
+  }
+
+  const memories = JSON.parse(fs.readFileSync(memoriesPath, "utf8"));
+
+  res.json(memories);
+});
 
 app.get("/", (req, res) => {
   res.send("Stormforged bot API is running.");
@@ -122,6 +133,21 @@ await client.application.commands.create({
     }
   ]
 });
+new SlashCommandBuilder()
+  .setName("addmemory")
+  .setDescription("Add a guild memory image to the website gallery")
+  .addAttachmentOption(option =>
+    option
+      .setName("image")
+      .setDescription("The image to add")
+      .setRequired(true)
+  )
+  .addStringOption(option =>
+    option
+      .setName("title")
+      .setDescription("Optional memory title")
+      .setRequired(false)
+  )
 await client.application.commands.create({
   name: "exportrole",
   description: "Export all users with a specific role",

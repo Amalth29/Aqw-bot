@@ -11,8 +11,10 @@ const {
 
 const fs = require("fs");
 const path = require("path");
+const { v2: cloudinary } = require("cloudinary");
 
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, "../data");
+const memoriesPath = path.join(DATA_DIR, "memories.json");
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -101,6 +103,47 @@ module.exports = (client) => {
       });
     }
   }
+}
+if (interaction.commandName === "addmemory") {
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  const image = interaction.options.getAttachment("image");
+  const title = interaction.options.getString("title") || "Stormforged Memory";
+
+  if (!image.contentType?.startsWith("image/")) {
+    return interaction.editReply("❌ Please upload an image file.");
+  }
+
+  const uploaded = await cloudinary.uploader.upload(image.url, {
+    folder: "stormforged-memories"
+  });
+
+  const memories = fs.existsSync(memoriesPath)
+    ? JSON.parse(fs.readFileSync(memoriesPath, "utf8"))
+    : [];
+
+  memories.unshift({
+    title,
+    imageUrl: uploaded.secure_url,
+    uploadedBy: interaction.user.tag,
+    uploadedAt: new Date().toISOString()
+  });
+
+  fs.writeFileSync(memoriesPath, JSON.stringify(memories, null, 2));
+
+  return interaction.editReply("✅ Memory added to website gallery.");
 }
 if (interaction.isChatInputCommand()) {
   if (interaction.commandName === "exportrole") {
@@ -301,7 +344,7 @@ if (interaction.commandName === "calendar") {
       {
         name: "Legend",
         value:
-          "🟣 **ALL** • ⚡ **EXP** • 🟡 **Gold** • 🟢 **Rep** • 🔵 **CP** • ✨ **Ess** • 🛠️ **MW** • 🔑 **Keys**",
+          "🟣 **ALL** • ⚡ **EXP** • 🟡 **Gold** • 🟢 **Reputation** • 🔵 **Classpoint** • ✨ **Essence+Totem** • 🛠️ **MidWeek** • 🔑 **Keys**",
         inline: false,
       }
     )
