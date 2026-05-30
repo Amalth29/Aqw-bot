@@ -151,7 +151,7 @@ await client.application.commands.create({
     }
   ]
 });
-console.log(`✅ Registered command: ${cmd.name}`);
+console.log("✅ /addmemory registered");
 await client.application.commands.create({
   name: "exportrole",
   description: "Export all users with a specific role",
