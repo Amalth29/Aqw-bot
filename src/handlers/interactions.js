@@ -135,15 +135,56 @@ if (interaction.commandName === "addmemory") {
     : [];
 
   memories.unshift({
-    title,
-    imageUrl: uploaded.secure_url,
-    uploadedBy: interaction.user.tag,
-    uploadedAt: new Date().toISOString()
-  });
+  id: Date.now().toString(),
+  title,
+  imageUrl: uploaded.secure_url,
+  publicId: uploaded.public_id,
+  uploadedBy: interaction.user.tag,
+  uploadedAt: new Date().toISOString()
+});
 
   fs.writeFileSync(memoriesPath, JSON.stringify(memories, null, 2));
 
   return interaction.editReply("✅ Memory added to website gallery.");
+}
+if (interaction.commandName === "deletememory") {
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  const memoryId = interaction.options.getString("id");
+
+  if (!fs.existsSync(memoriesPath)) {
+    return interaction.editReply("❌ No memories found.");
+  }
+
+  const memories = JSON.parse(fs.readFileSync(memoriesPath, "utf8"));
+
+  const memory = memories.find(m => m.id === memoryId);
+
+  if (!memory) {
+    return interaction.editReply("❌ Memory not found with that ID.");
+  }
+
+  const updatedMemories = memories.filter(m => m.id !== memoryId);
+
+  fs.writeFileSync(memoriesPath, JSON.stringify(updatedMemories, null, 2));
+
+  if (memory.publicId) {
+    await cloudinary.uploader.destroy(memory.publicId).catch(() => {});
+  }
+
+  return interaction.editReply(`✅ Deleted memory: **${memory.title || memory.id}**`);
 }
 if (interaction.isChatInputCommand()) {
   if (interaction.commandName === "exportrole") {

@@ -153,6 +153,20 @@ await client.application.commands.create({
 });
 console.log("✅ /addmemory registered");
 await client.application.commands.create({
+  name: "deletememory",
+  description: "Delete a memory from the website gallery",
+  options: [
+    {
+      name: "id",
+      description: "The memory ID to delete",
+      type: 3,
+      required: true
+    }
+  ]
+});
+
+console.log("✅ /deletememory registered");
+await client.application.commands.create({
   name: "exportrole",
   description: "Export all users with a specific role",
   options: [
