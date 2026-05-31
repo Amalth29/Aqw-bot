@@ -141,15 +141,51 @@ await client.application.commands.create({
     {
       name: "image",
       description: "The image to add",
-      type: 11, // Attachment
+      type: 11,
       required: true
     },
     {
       name: "title",
       description: "Memory title",
-      type: 3, // String
+      type: 3,
       required: false
-    }
+    },
+    {
+      name: "category",
+      description: "Memory category",
+      type: 3,
+      required: true,
+      choices: [
+        {
+          name: "Guild Events",
+          value: "guild-events"
+        },
+        {
+          name: "Boss Events",
+          value: "boss-events"
+        },
+        {
+          name: "Alliance Pictorials",
+          value: "alliance-pictorials"
+        },
+        {
+          name: "General",
+          value: "general"
+        }
+      ]
+    },
+    {
+      name: "pinned",
+      description: "Show on homepage",
+      type: 5,
+      required: false
+    },
+    {
+  name: "description",
+  description: "Short description for the memory",
+  type: 3,
+  required: false
+}
   ]
 });
 console.log("✅ /addmemory registered");

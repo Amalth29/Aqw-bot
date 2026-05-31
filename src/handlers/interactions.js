@@ -121,7 +121,9 @@ if (interaction.commandName === "addmemory") {
 
   const image = interaction.options.getAttachment("image");
   const title = interaction.options.getString("title") || "Stormforged Memory";
-
+  const category = interaction.options.getString("category");
+  const pinned = interaction.options.getBoolean("pinned") ?? false;
+  const description = interaction.options.getString("description") || "";
   if (!image.contentType?.startsWith("image/")) {
     return interaction.editReply("❌ Please upload an image file.");
   }
@@ -137,8 +139,11 @@ if (interaction.commandName === "addmemory") {
   memories.unshift({
   id: Date.now().toString(),
   title,
+  description,
   imageUrl: uploaded.secure_url,
   publicId: uploaded.public_id,
+  category,
+  pinned,
   uploadedBy: interaction.user.tag,
   uploadedAt: new Date().toISOString()
 });
