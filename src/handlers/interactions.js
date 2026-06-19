@@ -62,7 +62,7 @@ const CATEGORY_INFO = {
   EXP: { emoji: "⚡", label: "EXP" },
   Rep: { emoji: "🟢", label: "Reputation" },
   MW: { emoji: "🛠️", label: "Mid-Week" },
-  Unk: { emoji: "❓", label: "Unidentified" },
+  Unk: { emoji: "❓", label: "Unk – Uni 34+35" },
 };
 
 function categorizeTitle(title) {
@@ -200,7 +200,7 @@ function buildCalendarPayload(year, month) {
         inline: false,
       }
     )
-    .setFooter({ text: "Stormforged AQW Calendar" })
+    .setFooter({ text: "AQW Calendar" })
     .setTimestamp();
 
   const row = new ActionRowBuilder().addComponents(
