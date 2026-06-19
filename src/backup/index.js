@@ -254,36 +254,7 @@ await client.application.commands.create({
 
   await client.application.commands.create({
     name: "calendar",
-    description: "Shows the AQW boost calendar",
-    options: [
-      {
-        name: "month",
-        description: "Month (1-12), defaults to current month",
-        type: 4,
-        required: false,
-        min_value: 1,
-        max_value: 12
-      },
-      {
-        name: "year",
-        description: "Year (e.g. 2026), defaults to current year",
-        type: 4,
-        required: false
-      }
-    ]
-  });
-
-  await client.application.commands.create({
-    name: "calendarupdate",
-    description: "Upload a new artix_calendar.json (Admin only)",
-    options: [
-      {
-        name: "file",
-        description: "The artix_calendar.json file from the bookmarklet",
-        type: 11,
-        required: true
-      }
-    ]
+    description: "Shows the AQW boost calendar for May 2026"
   });
 
   
