@@ -36,7 +36,10 @@ function log(message) {
 // ---------------------------------------------------------------------
 
 // Order matters: more specific patterns should come before generic ones.
+// "ALL" is now a real category — it matches the literal "Double ALL Boost"
+// event, not a synthetic merge of multiple boosts on the same day.
 const BOOST_CATEGORY_RULES = [
+  { code: "ALL", pattern: /\ball\b/i },
   { code: "MW", pattern: /mid-?week/i },
   { code: "Keys", pattern: /keys/i },
   { code: "Ess", pattern: /essence|totem/i },
@@ -44,7 +47,23 @@ const BOOST_CATEGORY_RULES = [
   { code: "Gold", pattern: /gold/i },
   { code: "EXP", pattern: /\bexp\b|experience|\bxp\b/i },
   { code: "Rep", pattern: /\brep\b|reputation/i },
+  // Catch-all for boosts Artix hasn't revealed yet, e.g.
+  // "Unidentified 34 & 35 Boost" — abbreviates the long title.
+  { code: "Unk", pattern: /unidentified/i },
 ];
+
+// Emoji + display label for each code, used to render the legend.
+const CATEGORY_INFO = {
+  ALL: { emoji: "🟣", label: "ALL" },
+  Keys: { emoji: "🔑", label: "Keys" },
+  Ess: { emoji: "✨", label: "Essence+Totem" },
+  CP: { emoji: "🔵", label: "Class Points" },
+  Gold: { emoji: "🟡", label: "Gold" },
+  EXP: { emoji: "⚡", label: "EXP" },
+  Rep: { emoji: "🟢", label: "Reputation" },
+  MW: { emoji: "🛠️", label: "Mid-Week" },
+  Unk: { emoji: "❓", label: "Unidentified" },
+};
 
 function categorizeTitle(title) {
   for (const rule of BOOST_CATEGORY_RULES) {
@@ -53,31 +72,42 @@ function categorizeTitle(title) {
   return null;
 }
 
-// If a day has more than one distinct boost category, show it as "ALL".
+// Returns the display code for a day's events. Each distinct boost
+// category found that day is kept and joined together (e.g. "Keys + EXP")
+// instead of being collapsed into a synthetic "ALL" the moment a day has
+// more than one boost.
 function categorizeDay(events) {
-  const codes = new Set();
-  const unmapped = [];
+  const codes = [];
 
   for (const ev of events) {
-    const code = categorizeTitle(ev.title || "");
-    if (code) {
-      codes.add(code);
-    } else {
-      unmapped.push(ev.title || "?");
+    const code = categorizeTitle(ev.title || "") || "Unk";
+    if (!codes.includes(code)) codes.push(code);
+  }
+
+  if (codes.length === 0) return "?";
+  return codes.join(" + ");
+}
+
+// Builds the legend from whatever categories actually appear in dayMap
+// for the month being displayed — nothing hardcoded.
+function calendarLegendText(dayMap) {
+  const used = new Set();
+
+  for (const info of Object.values(dayMap)) {
+    for (const code of info.code.split(" + ")) {
+      if (CATEGORY_INFO[code]) used.add(code);
     }
   }
 
-  if (codes.size > 1) return "ALL";
-  if (codes.size === 1) return [...codes][0];
-  if (unmapped.length > 0) return unmapped[0].slice(0, 14);
-  return "?";
-}
+  const orderedCodes = BOOST_CATEGORY_RULES
+    .map(rule => rule.code)
+    .filter(code => used.has(code));
 
-function calendarLegendText() {
-  return (
-    "🟣 **ALL** • ⚡ **EXP** • 🟡 **Gold** • 🟢 **Reputation** • " +
-    "🔵 **Classpoint** • ✨ **Essence+Totem** • 🛠️ **MidWeek** • 🔑 **Keys**"
-  );
+  if (orderedCodes.length === 0) return "No boost data for this month.";
+
+  return orderedCodes
+    .map(code => `${CATEGORY_INFO[code].emoji} **${CATEGORY_INFO[code].label}**`)
+    .join(" • ");
 }
 
 // Buckets the days of a month into Sunday→Saturday weeks. Only days
@@ -128,6 +158,64 @@ function getEventsForMonth(year, month) {
   }
 
   return dayMap;
+}
+
+// Builds the embed + Prev/Next button row for a given month/year.
+// Returns { embed: null, row: null, monthName } if there's no data,
+// so callers can decide how to message that (reply vs ephemeral follow-up).
+function buildCalendarPayload(year, month) {
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", { month: "long" });
+
+  const rawDayMap = getEventsForMonth(year, month);
+
+  const dayMap = {};
+  for (const [day, data] of Object.entries(rawDayMap)) {
+    dayMap[day] = { code: categorizeDay(data.events) };
+  }
+
+  const weeks = groupDaysIntoWeeks(year, month, dayMap);
+
+  if (weeks.length === 0) {
+    return { embed: null, row: null, monthName };
+  }
+
+  const formatWeek = (items) =>
+    "```text\n" +
+    items.map(i => `${String(i.day).padEnd(2)}  ${i.code}`).join("\n") +
+    "\n```";
+
+  const embed = new EmbedBuilder()
+    .setTitle(`📅 AQW Boost Calendar — ${monthName} ${year}`)
+    .setColor(0x3b82f6)
+    .setDescription("Monthly AQW boost schedule.")
+    .addFields(
+      ...weeks.map((week, i) => ({
+        name: `Week ${i + 1}`,
+        value: formatWeek(week),
+        inline: true,
+      })),
+      {
+        name: "Legend",
+        value: calendarLegendText(dayMap),
+        inline: false,
+      }
+    )
+    .setFooter({ text: "Stormforged AQW Calendar" })
+    .setTimestamp();
+
+  const row = new ActionRowBuilder().addComponents(
+    new ButtonBuilder()
+      .setCustomId(`calendar_prev_${year}_${month}`)
+      .setLabel("◀ Prev")
+      .setStyle(ButtonStyle.Secondary),
+
+    new ButtonBuilder()
+      .setCustomId(`calendar_next_${year}_${month}`)
+      .setLabel("Next ▶")
+      .setStyle(ButtonStyle.Primary)
+  );
+
+  return { embed, row, monthName };
 }
 
 module.exports = (client) => {
@@ -474,57 +562,22 @@ if (interaction.isChatInputCommand()) {
   return interaction.showModal(modal);
 }
 if (interaction.commandName === "calendar") {
-  const { EmbedBuilder } = require("discord.js");
-
   const now = new Date();
   const month = interaction.options.getInteger("month") ?? now.getMonth() + 1;
   const year = interaction.options.getInteger("year") ?? now.getFullYear();
 
-  const rawDayMap = getEventsForMonth(year, month);
+  const { embed, row, monthName } = buildCalendarPayload(year, month);
 
-  const dayMap = {};
-  for (const [day, data] of Object.entries(rawDayMap)) {
-    dayMap[day] = { code: categorizeDay(data.events) };
-  }
-
-  const weeks = groupDaysIntoWeeks(year, month, dayMap);
-
-  if (weeks.length === 0) {
+  if (!embed) {
     return interaction.reply({
       content:
-        `❌ No boost data found for ${month}/${year}. ` +
+        `❌ No boost data found for ${monthName} ${year}. ` +
         `Has the calendar data been uploaded yet? Use \`/calendarupdate\`.`,
       ephemeral: true
     });
   }
 
-  const formatWeek = (items) =>
-    "```text\n" +
-    items.map(i => `${String(i.day).padEnd(2)}  ${i.code}`).join("\n") +
-    "\n```";
-
-  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", { month: "long" });
-
-  const embed = new EmbedBuilder()
-    .setTitle(`📅 AQW Boost Calendar — ${monthName} ${year}`)
-    .setColor(0x3b82f6)
-    .setDescription("Monthly AQW boost schedule.")
-    .addFields(
-      ...weeks.map((week, i) => ({
-        name: `Week ${i + 1}`,
-        value: formatWeek(week),
-        inline: true,
-      })),
-      {
-        name: "Legend",
-        value: calendarLegendText(),
-        inline: false,
-      }
-    )
-    .setFooter({ text: "Stormforged AQW Calendar" })
-    .setTimestamp();
-
-  return interaction.reply({ embeds: [embed] });
+  return interaction.reply({ embeds: [embed], components: [row] });
 }
 
 if (interaction.commandName === "calendarupdate") {
@@ -1081,6 +1134,42 @@ log(
 }
     // BUTTON
     if (interaction.isButton()) {
+      if (
+        interaction.customId.startsWith("calendar_prev_") ||
+        interaction.customId.startsWith("calendar_next_")
+      ) {
+        // customId shape: calendar_<prev|next>_<year>_<month>
+        const parts = interaction.customId.split("_");
+        const direction = parts[1];
+        const year = Number(parts[2]);
+        const month = Number(parts[3]);
+
+        let newYear = year;
+        let newMonth = direction === "next" ? month + 1 : month - 1;
+
+        if (newMonth > 12) {
+          newMonth = 1;
+          newYear += 1;
+        } else if (newMonth < 1) {
+          newMonth = 12;
+          newYear -= 1;
+        }
+
+        const { embed, row, monthName } = buildCalendarPayload(newYear, newMonth);
+
+        if (!embed) {
+          return interaction.reply({
+            content: `❌ No boost data found for ${monthName} ${newYear}.`,
+            ephemeral: true
+          });
+        }
+
+        return interaction.update({
+          embeds: [embed],
+          components: [row]
+        });
+      }
+
       if (
   interaction.customId.startsWith("guild_roster_next_") ||
   interaction.customId.startsWith("guild_roster_prev_")

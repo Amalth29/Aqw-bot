@@ -20,6 +20,7 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 const guildRosterPath = path.join(DATA_DIR, "guildRoster.json");
+const calendarDataPath = path.join(DATA_DIR, "artix_calendar.json");
 
 const config = require("../config");
 const embeds = require("../utils/embeds");
@@ -28,6 +29,105 @@ function log(message) {
   const timestamp = new Date().toLocaleString();
 
   console.log(`[${timestamp}] ${message}`);
+}
+
+// ---------------------------------------------------------------------
+// AQW boost calendar helpers
+// ---------------------------------------------------------------------
+
+// Order matters: more specific patterns should come before generic ones.
+const BOOST_CATEGORY_RULES = [
+  { code: "MW", pattern: /mid-?week/i },
+  { code: "Keys", pattern: /keys/i },
+  { code: "Ess", pattern: /essence|totem/i },
+  { code: "CP", pattern: /class\s*points?|\bcp\b/i },
+  { code: "Gold", pattern: /gold/i },
+  { code: "EXP", pattern: /\bexp\b|experience|\bxp\b/i },
+  { code: "Rep", pattern: /\brep\b|reputation/i },
+];
+
+function categorizeTitle(title) {
+  for (const rule of BOOST_CATEGORY_RULES) {
+    if (rule.pattern.test(title)) return rule.code;
+  }
+  return null;
+}
+
+// If a day has more than one distinct boost category, show it as "ALL".
+function categorizeDay(events) {
+  const codes = new Set();
+  const unmapped = [];
+
+  for (const ev of events) {
+    const code = categorizeTitle(ev.title || "");
+    if (code) {
+      codes.add(code);
+    } else {
+      unmapped.push(ev.title || "?");
+    }
+  }
+
+  if (codes.size > 1) return "ALL";
+  if (codes.size === 1) return [...codes][0];
+  if (unmapped.length > 0) return unmapped[0].slice(0, 14);
+  return "?";
+}
+
+function calendarLegendText() {
+  return (
+    "🟣 **ALL** • ⚡ **EXP** • 🟡 **Gold** • 🟢 **Reputation** • " +
+    "🔵 **Classpoint** • ✨ **Essence+Totem** • 🛠️ **MidWeek** • 🔑 **Keys**"
+  );
+}
+
+// Buckets the days of a month into Sunday→Saturday weeks. Only days
+// present in dayMap (i.e. days that actually have a boost) get included.
+function groupDaysIntoWeeks(year, month, dayMap) {
+  const totalDays = new Date(year, month, 0).getDate();
+  const weeks = [];
+  let current = [];
+
+  for (let day = 1; day <= totalDays; day++) {
+    const date = new Date(year, month - 1, day);
+    if (dayMap[day]) {
+      current.push({ day, ...dayMap[day] });
+    }
+    const isSaturday = date.getDay() === 6;
+    const isLastDayOfMonth = day === totalDays;
+    if (isSaturday || isLastDayOfMonth) {
+      if (current.length > 0) weeks.push(current);
+      current = [];
+    }
+  }
+
+  return weeks;
+}
+
+// Reads artix_calendar.json and returns { [day]: { events: [...] } } for
+// the requested month/year.
+function getEventsForMonth(year, month) {
+  if (!fs.existsSync(calendarDataPath)) return {};
+
+  let all;
+  try {
+    all = JSON.parse(fs.readFileSync(calendarDataPath, "utf8"));
+  } catch (err) {
+    console.error("[calendar] Failed to parse artix_calendar.json:", err);
+    return {};
+  }
+
+  const prefix = `${year}-${String(month).padStart(2, "0")}`;
+  const dayMap = {};
+
+  for (const entry of all) {
+    if (!entry.date || !entry.date.startsWith(prefix)) continue;
+    if (!entry.events || entry.events.length === 0) continue;
+    const day = parseInt(entry.date.split("-")[2], 10);
+    if (Number.isNaN(day)) continue;
+    dayMap[day] = { events: entry.events };
+  }
+
+  return dayMap;
 }
 
 module.exports = (client) => {
@@ -376,69 +476,48 @@ if (interaction.isChatInputCommand()) {
 if (interaction.commandName === "calendar") {
   const { EmbedBuilder } = require("discord.js");
 
+  const now = new Date();
+  const month = interaction.options.getInteger("month") ?? now.getMonth() + 1;
+  const year = interaction.options.getInteger("year") ?? now.getFullYear();
+
+  const rawDayMap = getEventsForMonth(year, month);
+
+  const dayMap = {};
+  for (const [day, data] of Object.entries(rawDayMap)) {
+    dayMap[day] = { code: categorizeDay(data.events) };
+  }
+
+  const weeks = groupDaysIntoWeeks(year, month, dayMap);
+
+  if (weeks.length === 0) {
+    return interaction.reply({
+      content:
+        `❌ No boost data found for ${month}/${year}. ` +
+        `Has the calendar data been uploaded yet? Use \`/calendarupdate\`.`,
+      ephemeral: true
+    });
+  }
+
   const formatWeek = (items) =>
     "```text\n" +
-    items.map(i => `${i.day.padEnd(2)}  ${i.boost}`).join("\n") +
+    items.map(i => `${String(i.day).padEnd(2)}  ${i.code}`).join("\n") +
     "\n```";
 
+  const monthName = new Date(year, month - 1, 1).toLocaleString("en-US", { month: "long" });
+
   const embed = new EmbedBuilder()
-    .setTitle("📅 AQW Boost Calendar — May 2026")
+    .setTitle(`📅 AQW Boost Calendar — ${monthName} ${year}`)
     .setColor(0x3b82f6)
     .setDescription("Monthly AQW boost schedule.")
     .addFields(
-      {
-        name: "Week 1",
-        value: formatWeek([
-          { day: "1", boost: "ALL" },
-          { day: "2", boost: "Keys" },
-        ]),
+      ...weeks.map((week, i) => ({
+        name: `Week ${i + 1}`,
+        value: formatWeek(week),
         inline: true,
-      },
-      {
-        name: "Week 2",
-        value: formatWeek([
-          { day: "4", boost: "Gold" },
-          { day: "5", boost: "MW" },
-          { day: "6", boost: "Rep" },
-          { day: "7", boost: "Ess" },
-          { day: "8", boost: "CP" },
-        ]),
-        inline: true,
-      },
-      {
-        name: "Week 3",
-        value: formatWeek([
-          { day: "11", boost: "EXP" },
-          { day: "12", boost: "MW" },
-          { day: "13", boost: "Gold" },
-          { day: "15", boost: "Rep" },
-        ]),
-        inline: true,
-      },
-      {
-        name: "Week 4",
-        value: formatWeek([
-          { day: "18", boost: "CP" },
-          { day: "19", boost: "MW" },
-          { day: "20", boost: "EXP" },
-          { day: "22", boost: "Gold" },
-        ]),
-        inline: true,
-      },
-      {
-        name: "Week 5",
-        value: formatWeek([
-          { day: "25", boost: "Rep" },
-          { day: "26", boost: "MW" },
-          { day: "27", boost: "CP" },
-          { day: "29", boost: "ALL" },
-        ]),
-        inline: true,
-      },
+      })),
       {
         name: "Legend",
-        value:
-          "🟣 **ALL** • ⚡ **EXP** • 🟡 **Gold** • 🟢 **Reputation** • 🔵 **Classpoint** • ✨ **Essence+Totem** • 🛠️ **MidWeek** • 🔑 **Keys**",
+        value: calendarLegendText(),
         inline: false,
       }
     )
@@ -446,6 +525,58 @@ if (interaction.commandName === "calendar") {
     .setTimestamp();
 
   return interaction.reply({ embeds: [embed] });
+}
+
+if (interaction.commandName === "calendarupdate") {
+  const allowedRole = "1448328583020941423";
+
+  const isAdmin = interaction.member.permissions.has("Administrator");
+  const hasRole = interaction.member.roles.cache.has(allowedRole);
+
+  if (!isAdmin && !hasRole) {
+    return interaction.reply({
+      content: "❌ No permission.",
+      ephemeral: true
+    });
+  }
+
+  const attachment = interaction.options.getAttachment("file");
+
+  if (!attachment.name.toLowerCase().endsWith(".json")) {
+    return interaction.reply({
+      content: "❌ Please upload the `artix_calendar.json` file.",
+      ephemeral: true
+    });
+  }
+
+  await interaction.deferReply({ ephemeral: true });
+
+  try {
+    const response = await fetch(attachment.url);
+    const text = await response.text();
+
+    let parsed;
+    try {
+      parsed = JSON.parse(text);
+    } catch (err) {
+      return interaction.editReply("❌ That file isn't valid JSON.");
+    }
+
+    if (!Array.isArray(parsed)) {
+      return interaction.editReply("❌ Expected a JSON array of {date, events}.");
+    }
+
+    fs.writeFileSync(calendarDataPath, JSON.stringify(parsed, null, 2));
+
+    const totalEvents = parsed.reduce((sum, d) => sum + (d.events?.length || 0), 0);
+
+    return interaction.editReply(
+      `✅ Calendar data updated: ${parsed.length} days, ${totalEvents} events loaded.`
+    );
+  } catch (err) {
+    console.error("[calendarupdate]", err);
+    return interaction.editReply(`❌ Failed to update calendar data: ${err.message}`);
+  }
 }
 }
 if (interaction.commandName === "announce") {
